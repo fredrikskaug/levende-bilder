@@ -23,6 +23,10 @@ function create(FaceLandmarker, fileset, model, delegate) {
   // it run again, otherwise the second landmarker fails with "ModuleFactory not set"
   const own = { ...fileset, wasmLoaderPath: `${fileset.wasmLoaderPath}?${delegate}` };
   return FaceLandmarker.createFromOptions(own, {
+    // Our own canvas: MediaPipe only trusts OffscreenCanvas in browsers whose user agent says
+    // Safari ≥ 17 or Chrome, and otherwise makes one with document.createElement. Chrome, Arc
+    // and in-app browsers on iPhone say neither, and a worker has no document.
+    canvas: new OffscreenCanvas(1, 1),
     baseOptions: { modelAssetPath: model, delegate },
     runningMode: 'VIDEO',
     numFaces: 1,
@@ -50,6 +54,7 @@ function maybeChoose() {
 self.onmessage = async ({ data: msg }) => {
   if (msg.type === 'init') {
     try {
+      if (typeof OffscreenCanvas === 'undefined') throw new Error('Nettleseren er for gammel for hodesporing (iOS 16.4 eller nyere trengs).');
       const { FilesetResolver, FaceLandmarker } = await import(`${msg.base}/vision_bundle.mjs`);
       const fileset = await FilesetResolver.forVisionTasks(`${msg.base}/wasm`, true); // ES module build for module workers
       const wanted = msg.delegate === 'auto' ? ['GPU', 'CPU'] : [msg.delegate];
