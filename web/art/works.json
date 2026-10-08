@@ -1,0 +1,519 @@
+{
+  "works": [
+    {
+      "id": "NG.M.00467",
+      "slug": "ng-m-00467",
+      "title": "Brudeferd i Hardanger",
+      "titleEn": "Bridal Procession on the Hardangerfjord",
+      "artist": "Hans Gude, Adolph Tidemand",
+      "date": "1848",
+      "material": "Olje på lerret",
+      "photoCredit": "Nasjonalmuseet/Børre Høstland",
+      "pageUrl": "https://www.nasjonalmuseet.no/samlingen/objekt/NG.M.00467",
+      "originalFile": "NG.M.00467_FERDIG50msH_crop.tif",
+      "iiifUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/NG.M.00467_FERDIG50msH_crop.tif/full/1500,/0/default.jpg",
+      "image": "art/ng-m-00467/image.jpg",
+      "depth": "art/ng-m-00467/depth.png",
+      "focus": 0.55,
+      "strength": 1.0,
+      "depthModel": "DA3MONO-LARGE",
+      "creators": [
+        {
+          "name": "Hans Gude",
+          "url": "https://www.nasjonalmuseet.no/samlingen/produsent/56837/hans-gude"
+        },
+        {
+          "name": "Adolph Tidemand",
+          "url": "https://www.nasjonalmuseet.no/samlingen/produsent/53525/adolph-tidemand"
+        }
+      ],
+      "genre": "Maleri",
+      "institution": "Nasjonalmuseet",
+      "license": "CC BY 4.0",
+      "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/NG.M.00467_FERDIG50msH_crop.tif/full/1500,/0/default.jpg",
+      "protected": false
+    },
+    {
+      "id": "NG.M.00844",
+      "slug": "ng-m-00844",
+      "title": "Pikene på broen",
+      "titleEn": "The Girls on the Bridge",
+      "artist": "Edvard Munch",
+      "creators": [
+        {
+          "name": "Edvard Munch",
+          "url": "https://www.nasjonalmuseet.no/samlingen/produsent/56154/edvard-munch"
+        }
+      ],
+      "genre": "Maleri",
+      "date": "Antagelig 1901",
+      "material": "Olje på lerret",
+      "institution": "Nasjonalmuseet",
+      "license": "CC BY 4.0",
+      "photoCredit": "Nasjonalmuseet/Høstland, Børre",
+      "pageUrl": "https://www.nasjonalmuseet.no/samlingen/objekt/NG.M.00844",
+      "originalFile": "113297.tif",
+      "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/113297.tif/full/1500,/0/default.jpg",
+      "image": "art/ng-m-00844/image.jpg",
+      "depth": "art/ng-m-00844/depth.png",
+      "focus": 0.7,
+      "strength": 1.0,
+      "depthModel": "DA3MONO-LARGE",
+      "protected": false
+    },
+    {
+      "id": "NG.M.01060",
+      "slug": "ng-m-01060",
+      "title": "Fra Stalheim",
+      "titleEn": "View from Stalheim",
+      "artist": "Johan Christian Dahl",
+      "date": "1842",
+      "material": "Olje på lerret",
+      "photoCredit": "Nasjonalmuseet/Høstland, Børre",
+      "pageUrl": "https://www.nasjonalmuseet.no/samlingen/objekt/NG.M.01060",
+      "originalFile": "147710.tif",
+      "iiifUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/147710.tif/full/1500,/0/default.jpg",
+      "image": "art/ng-m-01060/image.jpg",
+      "depth": "art/ng-m-01060/depth.png",
+      "focus": 0.5,
+      "strength": 1.1,
+      "depthModel": "DA3MONO-LARGE",
+      "creators": [
+        {
+          "name": "Johan Christian Dahl",
+          "url": "https://www.nasjonalmuseet.no/samlingen/produsent/54331/johan-christian-dahl"
+        }
+      ],
+      "genre": "Maleri",
+      "institution": "Nasjonalmuseet",
+      "license": "CC BY 4.0",
+      "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/147710.tif/full/1500,/0/default.jpg",
+      "protected": false
+    },
+    {
+      "id": "NG.M.02582",
+      "slug": "ng-m-02582",
+      "title": "Blått interiør",
+      "titleEn": "Blue Interior",
+      "artist": "Harriet Backer",
+      "creators": [
+        {
+          "name": "Harriet Backer",
+          "url": "https://www.nasjonalmuseet.no/samlingen/produsent/54814/harriet-backer"
+        }
+      ],
+      "genre": "Maleri",
+      "date": "1883",
+      "material": "Olje på lerret",
+      "institution": "Nasjonalmuseet",
+      "license": "CC BY 4.0",
+      "photoCredit": "Nasjonalmuseet/Børre Høstland",
+      "pageUrl": "https://www.nasjonalmuseet.no/samlingen/objekt/NG.M.02582",
+      "originalFile": "NG.M.02582.tif",
+      "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/NG.M.02582.tif/full/1500,/0/default.jpg",
+      "image": "art/ng-m-02582/image.jpg",
+      "depth": "art/ng-m-02582/depth.png",
+      "focus": 0.55,
+      "strength": 1.0,
+      "depthModel": "DA3MONO-LARGE",
+      "protected": false
+    },
+    {
+      "id": "NG.M.00320",
+      "slug": "ng-m-00320",
+      "title": "En bondebegravelse",
+      "titleEn": "Peasant Burial",
+      "artist": "Erik Werenskiold",
+      "creators": [
+        {
+          "name": "Erik Werenskiold",
+          "url": "https://www.nasjonalmuseet.no/samlingen/produsent/55802/erik-werenskiold"
+        }
+      ],
+      "genre": "Maleri",
+      "date": "1883-1885",
+      "material": "Olje på lerret",
+      "institution": "Nasjonalmuseet",
+      "license": "CC BY 4.0",
+      "photoCredit": "Nasjonalmuseet/Høstland, Børre",
+      "pageUrl": "https://www.nasjonalmuseet.no/samlingen/objekt/NG.M.00320",
+      "originalFile": "113291.tif",
+      "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/113291.tif/full/1500,/0/default.jpg",
+      "image": "art/ng-m-00320/image.jpg",
+      "depth": "art/ng-m-00320/depth.png",
+      "focus": 0.65,
+      "strength": 1.0,
+      "depthModel": "DA3MONO-LARGE",
+      "protected": false
+    },
+    {
+      "id": "NMK.2008.4921",
+      "slug": "nmk-2008-4921",
+      "title": "Mann på krakk i parken",
+      "titleEn": "Portrait of a man sitting on a park bench",
+      "artist": "Anders Beer Wilse",
+      "creators": [
+        {
+          "name": "Anders Beer Wilse",
+          "url": "https://www.nasjonalmuseet.no/samlingen/produsent/56784/anders-beer-wilse"
+        }
+      ],
+      "genre": "Fotografi",
+      "date": "1907",
+      "material": "sølvgelatin",
+      "institution": "Nasjonalmuseet",
+      "license": "CC BY 4.0",
+      "photoCredit": "Nasjonalmuseet/Nasjonalmuseet Robert Meyer Collection",
+      "pageUrl": "https://www.nasjonalmuseet.no/samlingen/objekt/NMK.2008.4921",
+      "originalFile": "49510.tif",
+      "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/49510.tif/full/1500,/0/default.jpg",
+      "image": "art/nmk-2008-4921/image.jpg",
+      "depth": "art/nmk-2008-4921/depth.png",
+      "focus": 0.6,
+      "strength": 1.0,
+      "depthModel": "DA3MONO-LARGE",
+      "protected": false
+    },
+    {
+      "id": "munch-foto-friluftsatelier-1933",
+      "slug": "munch-foto-friluftsatelier-1933",
+      "title": "Edvard Munch i friluftsatelieret på Ekely",
+      "titleEn": "Edvard Munch in the open-air studio at Ekely",
+      "artist": "Edvard Munch",
+      "creators": [
+        {
+          "name": "Edvard Munch",
+          "url": "https://www.munch.no/edvard-munch/hvem-var-edvard-munch/"
+        }
+      ],
+      "genre": "Fotografi",
+      "date": "1933",
+      "material": "",
+      "institution": "Munchmuseet",
+      "license": "© Munchmuseet",
+      "photoCredit": "",
+      "pageUrl": "https://www.munch.no/en/edvard-munch/ekely/photographs-from-ekely/",
+      "originalFile": "edvard-munch-foto/edvardmunchekely.jpg",
+      "imageUrl": "https://www.munch.no/globalassets/edvard-munch-foto/edvardmunchekely.jpg?w=1500&mode=Max&quality=95",
+      "image": "art/munch-foto-friluftsatelier-1933/image.jpg",
+      "depth": "art/munch-foto-friluftsatelier-1933/depth.png",
+      "focus": 0.6,
+      "strength": 1.0,
+      "depthModel": "DA3MONO-LARGE"
+    },
+    {
+      "id": "NG.M.00357",
+      "slug": "ng-m-00357",
+      "title": "Sommernatt",
+      "titleEn": "Summer Night",
+      "artist": "Kitty Kielland",
+      "date": "1886",
+      "material": "olje på lerret",
+      "photoCredit": "Nasjonalmuseet/Børre Høstland",
+      "pageUrl": "https://www.nasjonalmuseet.no/samlingen/objekt/NG.M.00357",
+      "originalFile": "136351.tif",
+      "iiifUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/136351.tif/full/1500,/0/default.jpg",
+      "image": "art/ng-m-00357/image.jpg",
+      "depth": "art/ng-m-00357/depth.png",
+      "focus": 0.5,
+      "strength": 1.0,
+      "depthModel": "DA3MONO-LARGE",
+      "creators": [
+        {
+          "name": "Kitty Kielland",
+          "url": "https://www.nasjonalmuseet.no/samlingen/produsent/57411/kitty-kielland"
+        }
+      ],
+      "genre": "Maleri",
+      "institution": "Nasjonalmuseet",
+      "license": "CC BY 4.0",
+      "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/136351.tif/full/1500,/0/default.jpg",
+      "protected": false
+    },
+    {
+      "id": "NMK.2007.6345",
+      "slug": "nmk-2007-6345",
+      "title": "Skjeggedalsfossen i Hardanger",
+      "titleEn": "",
+      "artist": "Knud Knudsen",
+      "creators": [
+        {
+          "name": "Knud Knudsen",
+          "url": "https://www.nasjonalmuseet.no/samlingen/produsent/54129/knud-knudsen"
+        }
+      ],
+      "genre": "Fotografi",
+      "date": "1872",
+      "material": "Sølv albumin utkopieringspapir",
+      "institution": "Nasjonalmuseet",
+      "license": "CC BY 4.0",
+      "photoCredit": "Nasjonalmuseet/Nasjonalmuseet Robert Meyer Collection",
+      "pageUrl": "https://www.nasjonalmuseet.no/samlingen/objekt/NMK.2007.6345",
+      "originalFile": "44958.tif",
+      "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/44958.tif/full/1500,/0/default.jpg",
+      "image": "art/nmk-2007-6345/image.jpg",
+      "depth": "art/nmk-2007-6345/depth.png",
+      "focus": 0.5,
+      "strength": 1.0,
+      "depthModel": "DA3MONO-LARGE",
+      "protected": false
+    },
+    {
+      "id": "NG.M.01725",
+      "slug": "ng-m-01725",
+      "title": "Rue Lafayette",
+      "titleEn": "",
+      "artist": "Edvard Munch",
+      "creators": [
+        {
+          "name": "Edvard Munch",
+          "url": "https://www.nasjonalmuseet.no/samlingen/produsent/56154/edvard-munch"
+        }
+      ],
+      "genre": "Maleri",
+      "date": "1891",
+      "material": "Olje på lerret",
+      "institution": "Nasjonalmuseet",
+      "license": "CC BY 4.0",
+      "photoCredit": "Nasjonalmuseet/Høstland, Børre",
+      "pageUrl": "https://www.nasjonalmuseet.no/samlingen/objekt/NG.M.01725",
+      "originalFile": "113123.tif",
+      "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/113123.tif/full/1500,/0/default.jpg",
+      "image": "art/ng-m-01725/image.jpg",
+      "depth": "art/ng-m-01725/depth.png",
+      "focus": 0.6,
+      "strength": 1.0,
+      "depthModel": "DA3MONO-LARGE",
+      "protected": false
+    },
+    {
+      "id": "NG.M.01632",
+      "slug": "ng-m-01632",
+      "title": "Labrofossen",
+      "titleEn": "The Labro Falls",
+      "artist": "Thomas Fearnley",
+      "date": "1838",
+      "material": "Olje på lerret",
+      "photoCredit": "Nasjonalmuseet/Jacques Lathion",
+      "pageUrl": "https://www.nasjonalmuseet.no/samlingen/objekt/NG.M.01632",
+      "originalFile": "37842.tif",
+      "iiifUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/37842.tif/full/1500,/0/default.jpg",
+      "image": "art/ng-m-01632/image.jpg",
+      "depth": "art/ng-m-01632/depth.png",
+      "focus": 0.5,
+      "strength": 1.0,
+      "depthModel": "DA3MONO-LARGE",
+      "creators": [
+        {
+          "name": "Thomas Fearnley",
+          "url": "https://www.nasjonalmuseet.no/samlingen/produsent/54685/thomas-fearnley"
+        }
+      ],
+      "genre": "Maleri",
+      "institution": "Nasjonalmuseet",
+      "license": "CC BY 4.0",
+      "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/37842.tif/full/1500,/0/default.jpg",
+      "protected": false
+    },
+    {
+      "id": "NG.M.03609",
+      "slug": "ng-m-03609",
+      "title": "Jonsokbål",
+      "titleEn": "Bonfire celebrating Midsummer Night",
+      "artist": "Nikolai Astrup",
+      "creators": [
+        {
+          "name": "Nikolai Astrup",
+          "url": "https://www.nasjonalmuseet.no/samlingen/produsent/53442/nikolai-astrup"
+        }
+      ],
+      "genre": "Maleri",
+      "date": "1912 og 1926",
+      "material": "Olje på papir oppklebet på trefiberplate",
+      "institution": "Nasjonalmuseet",
+      "license": "CC BY 4.0",
+      "photoCredit": "Nasjonalmuseet/Børre Høstland",
+      "pageUrl": "https://www.nasjonalmuseet.no/samlingen/objekt/NG.M.03609",
+      "originalFile": "NG.M.03609_PUBLISERING.tif",
+      "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/NG.M.03609_PUBLISERING.tif/full/1500,/0/default.jpg",
+      "image": "art/ng-m-03609/image.jpg",
+      "depth": "art/ng-m-03609/depth.png",
+      "focus": 0.5,
+      "strength": 1.0,
+      "depthModel": "DA3MONO-LARGE",
+      "protected": false
+    },
+    {
+      "id": "NG.M.00943",
+      "slug": "ng-m-00943",
+      "title": "Selvportrett",
+      "titleEn": "Self-portrait",
+      "artist": "Vincent van Gogh",
+      "creators": [
+        {
+          "name": "Vincent van Gogh",
+          "url": "https://www.nasjonalmuseet.no/samlingen/produsent/54081/vincent-van-gogh"
+        }
+      ],
+      "genre": "Maleri",
+      "date": "(1889)",
+      "material": "Olje på lerret",
+      "institution": "Nasjonalmuseet",
+      "license": "CC BY 4.0",
+      "photoCredit": "Nasjonalmuseet/Børre Høstland",
+      "pageUrl": "https://www.nasjonalmuseet.no/samlingen/objekt/NG.M.00943",
+      "originalFile": "NG.M.00943 Publisering.tif",
+      "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/NG.M.00943+Publisering.tif/full/1500,/0/default.jpg",
+      "image": "art/ng-m-00943/image.jpg",
+      "depth": "art/ng-m-00943/depth.png",
+      "focus": 0.5,
+      "strength": 1.0,
+      "depthModel": "DA3MONO-LARGE",
+      "protected": false
+    },
+    {
+      "id": "NG.M.00939",
+      "slug": "ng-m-00939",
+      "title": "Skrik",
+      "titleEn": "The Scream",
+      "artist": "Edvard Munch",
+      "creators": [
+        {
+          "name": "Edvard Munch",
+          "url": "https://www.nasjonalmuseet.no/samlingen/produsent/56154/edvard-munch"
+        }
+      ],
+      "genre": "Maleri",
+      "date": "1893",
+      "material": "Tempera og fettstift på papplate",
+      "institution": "Nasjonalmuseet",
+      "license": "CC BY 4.0",
+      "photoCredit": "Nasjonalmuseet/Høstland, Børre",
+      "pageUrl": "https://www.nasjonalmuseet.no/samlingen/objekt/NG.M.00939",
+      "originalFile": "NG.M.00939.tif",
+      "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/NG.M.00939.tif/full/1500,/0/default.jpg",
+      "image": "art/ng-m-00939/image.jpg",
+      "depth": "art/ng-m-00939/depth.png",
+      "focus": 0.5,
+      "strength": 1.0,
+      "depthModel": "DA3MONO-LARGE",
+      "protected": false
+    },
+    {
+      "id": "MS-00444-1988",
+      "slug": "ms-00444-1988",
+      "title": "The Last Heart",
+      "titleEn": "",
+      "artist": "Kjell Erik Killi Olsen",
+      "creators": [
+        {
+          "name": "Kjell Erik Killi Olsen",
+          "url": "https://www.nasjonalmuseet.no/samlingen/produsent/57464/kjell-erik-killi-olsen"
+        }
+      ],
+      "genre": "Maleri",
+      "date": "1983",
+      "material": "Olje og stift på lerret",
+      "institution": "Nasjonalmuseet",
+      "license": "© Olsen, Kjell Erik Killi/BONO",
+      "protected": true,
+      "photoCredit": "Nasjonalmuseet/Børre Høstland",
+      "pageUrl": "https://www.nasjonalmuseet.no/samlingen/objekt/MS-00444-1988",
+      "originalFile": "62129.tif",
+      "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/62129.tif/full/1500,/0/default.jpg",
+      "image": "art/ms-00444-1988/image.jpg",
+      "depth": "art/ms-00444-1988/depth.png",
+      "focus": 0.5,
+      "strength": 1.0,
+      "depthModel": "DA3MONO-LARGE"
+    },
+    {
+      "id": "MS-00063-1988",
+      "slug": "ms-00063-1988",
+      "title": "Laksefiskerens siste sommer I",
+      "titleEn": "",
+      "artist": "Kjell Erik Killi Olsen",
+      "creators": [
+        {
+          "name": "Kjell Erik Killi Olsen",
+          "url": "https://www.nasjonalmuseet.no/samlingen/produsent/57464/kjell-erik-killi-olsen"
+        }
+      ],
+      "genre": "Skulptur",
+      "date": "(1988)",
+      "material": "polyester, pigment, jern",
+      "institution": "Nasjonalmuseet",
+      "license": "© Olsen, Kjell Erik Killi/BONO",
+      "protected": true,
+      "photoCredit": "Nasjonalmuseet/Annar Bjørgli",
+      "pageUrl": "https://www.nasjonalmuseet.no/samlingen/objekt/MS-00063-1988",
+      "originalFile": "MS-00063-1988.tif",
+      "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/MS-00063-1988.tif/full/1500,/0/default.jpg",
+      "image": "art/ms-00063-1988/image.jpg",
+      "depth": "art/ms-00063-1988/depth.png",
+      "focus": 0.5,
+      "strength": 1.0,
+      "depthModel": "DA3MONO-LARGE"
+    },
+    {
+      "id": "NMK.2006.0117",
+      "slug": "nmk-2006-0117",
+      "title": "Kjole",
+      "titleEn": "",
+      "artist": "Grethe Røseth, Sandnes Ullvarefabrikk",
+      "creators": [
+        {
+          "name": "Grethe Røseth",
+          "url": "https://www.nasjonalmuseet.no/samlingen/produsent/51659/grethe-roseth"
+        },
+        {
+          "name": "Sandnes Ullvarefabrikk",
+          "url": "https://www.nasjonalmuseet.no/samlingen/produsent/47437/sandnes-ullvarefabrikk"
+        }
+      ],
+      "genre": "Kjole",
+      "date": "Ca. 1963",
+      "material": "Maskin- og håndsydd av maskinvevd ullstoff i toskaftbinding",
+      "institution": "Nasjonalmuseet",
+      "license": "CC BY 4.0",
+      "protected": false,
+      "photoCredit": "Nasjonalmuseet/Nasjonalmuseet",
+      "pageUrl": "https://www.nasjonalmuseet.no/samlingen/objekt/NMK.2006.0117",
+      "originalFile": "54697.tif",
+      "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/54697.tif/full/1500,/0/default.jpg",
+      "image": "art/nmk-2006-0117/image.jpg",
+      "depth": "art/nmk-2006-0117/depth.png",
+      "focus": 0.5,
+      "strength": 1.0,
+      "depthModel": "DA3MONO-LARGE"
+    },
+    {
+      "id": "NG.M.00302-011",
+      "slug": "ng-m-00302-011",
+      "title": "Hjørne av en bondestue, Bolkesjø",
+      "titleEn": "Farm Interior from Bolkesjø",
+      "artist": "Adolph Tidemand",
+      "creators": [
+        {
+          "name": "Adolph Tidemand",
+          "url": "https://www.nasjonalmuseet.no/samlingen/produsent/53525/adolph-tidemand"
+        }
+      ],
+      "genre": "Maleri",
+      "date": "1844",
+      "material": "Olje på papir oppklebet på lerret",
+      "institution": "Nasjonalmuseet",
+      "license": "CC BY 4.0",
+      "protected": false,
+      "photoCredit": "Nasjonalmuseet/Nasjonalmuseet",
+      "pageUrl": "https://www.nasjonalmuseet.no/samlingen/objekt/NG.M.00302-011",
+      "originalFile": "17834.tif",
+      "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/17834.tif/full/1500,/0/default.jpg",
+      "image": "art/ng-m-00302-011/image.jpg",
+      "depth": "art/ng-m-00302-011/depth.png",
+      "focus": 0.5,
+      "strength": 1.0,
+      "depthModel": "DA3MONO-LARGE"
+    }
+  ]
+}

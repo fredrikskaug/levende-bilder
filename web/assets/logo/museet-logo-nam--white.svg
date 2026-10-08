@@ -1,0 +1,23 @@
+<svg width="82" height="103" viewBox="0 0 82 103" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>logosymbol</title>
+    <defs>
+        <path id="a" d="M0 .027h72.984v22.84H0z" />
+        <path id="c" d="M.04.032h18.81V18.99H.04z" />
+        <path id="e" d="M.13.043h18.735v31.94H.13z" />
+    </defs>
+    <g fill="none" fill-rule="evenodd">
+        <path fill="#fff" d="M44.82 0v55.99L10.366 0H0v71h9.182V15.316L43.636 71H54V0z" />
+        <g transform="translate(0 80)">
+            <mask id="b" fill="#fff"><use xlink:href="#a" /></mask>
+            <path fill="#fff" mask="url(#b)" d="M53.25.027c-6.474 0-12.221 3.048-15.818 7.76-3.599-4.71-9.339-7.76-15.811-7.76-4.684 0-10.188 2.147-12.367 5.06v-4.5H0v22.28h9.254V19.33c-.269-6.368 5.277-11.07 11.787-11.07 6.51 0 11.315 4.702 11.315 11.07v3.536h9V19.33c0-6.368 4.804-11.07 11.315-11.07 6.509 0 11.315 4.702 11.315 11.07v3.536h8.998V19.33C72.984 8.67 64.149.027 53.25.027" />
+        </g>
+        <g transform="translate(63 14)">
+            <mask id="d" fill="#fff"><use xlink:href="#c" /></mask>
+            <path fill="#fff" mask="url(#d)" d="M.04 18.989h10.582c0-4.545 3.541-8.325 8.228-9.154V.032C8.301.927.04 9.071.04 18.99" />
+        </g>
+        <g transform="translate(63 38)">
+            <mask id="f" fill="#fff"><use xlink:href="#e" /></mask>
+            <path fill="#fff" mask="url(#f)" d="M.13 16.013c0 8.82 8.388 15.97 18.735 15.97v-8.148c-5.069 0-9.177-3.502-9.177-7.822s4.108-7.823 9.177-7.823V.043C8.518.043.13 7.193.13 16.013" />
+        </g>
+    </g>
+</svg>

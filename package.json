@@ -1,0 +1,16 @@
+{
+  "name": "depth-generator",
+  "private": true,
+  "type": "module",
+  "description": "Levende malerier: parallakse fra AI-dybdekart (Depth Anything 3) i WebGL2",
+  "scripts": {
+    "dev": "vite",
+    "dev:https": "vite --mode https",
+    "api": ".venv\\Scripts\\python tools/server.py",
+    "tunnel": "ngrok http 5174 --host-header=rewrite"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
+    "vite": "^8.3.3"
+  }
+}

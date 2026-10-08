@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="robots" content="noindex, nofollow"><!-- demo: not for search engines -->
+  <title>Levende bilder – Nasjonalmuseet (prototype)</title>
+  <meta name="description" content="Prototype: malerier og fotografier fra Nasjonalmuseet og MUNCH med parallakse fra et KI-generert dybdekart (Depth Anything 3).">
+  <link rel="preload" href="assets/fonts/MuseetSansText-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/MuseetSansText-Medium.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <canvas id="stage" aria-label="Maleri med dybdeeffekt"></canvas>
+  <div id="frame-area" aria-hidden="true"></div>
+
+  <header class="topbar ui">
+    <a class="logo" href="https://www.nasjonalmuseet.no/samlingen/" target="_blank" rel="noopener" aria-label="Nasjonalmuseet – Samlingen">
+      <img src="assets/logo/museet-logo-nam--white.svg" alt="" width="41" height="52">
+    </a>
+    <p class="section-label">Samlingen <span>· Levende bilder (prototype)</span></p>
+    <div class="top-actions">
+      <button id="gyro-btn" class="btn" hidden><span class="icon icon--move" aria-hidden="true"></span><span>Bruk bevegelse</span></button>
+      <button id="library-btn" class="btn" hidden aria-expanded="false" aria-controls="library"><span>Hent fra samlingen</span><span class="icon icon--search" aria-hidden="true"></span></button>
+      <button id="panel-btn" class="btn" aria-expanded="false" aria-controls="panel"><span>Innstillinger</span><span class="icon icon--filter" aria-hidden="true"></span></button>
+    </div>
+  </header>
+
+  <figure id="head-preview" class="head-preview ui" hidden aria-label="Kamera for hodesporing">
+    <div class="head-frame">
+      <video id="head-video" playsinline muted></video>
+      <span id="head-dot" class="head-dot" hidden></span>
+    </div>
+    <figcaption>Følger hodet · kun lokalt</figcaption>
+  </figure>
+
+  <div id="ai-badge" class="badge ui" title="Dybden er beregnet av en KI-modell (Depth Anything 3). Selve verket er ikke endret.">
+    <span class="icon icon--info" aria-hidden="true"></span>Dybdeeffekt laget med KI
+  </div>
+
+  <footer class="bottom ui">
+    <section class="caption" aria-live="polite">
+      <p class="category" id="category">Maleri</p>
+      <h1 id="title"></h1>
+      <p class="artists" id="artists"></p>
+      <p class="date" id="date"></p>
+      <p class="credit" id="credit"></p>
+    </section>
+
+    <div class="controls">
+      <ol id="thumbs" aria-label="Verk"></ol>
+      <div class="buttons">
+        <button id="original-btn" class="btn" aria-pressed="false"><span class="icon icon--image" aria-hidden="true"></span><span>Vis original</span></button>
+        <button id="prev" class="btn btn--icon" aria-label="Forrige verk"><span class="icon icon--arrow-left" aria-hidden="true"></span></button>
+        <span id="counter" class="counter"></span>
+        <button id="next" class="btn btn--icon" aria-label="Neste verk"><span class="icon icon--arrow-right" aria-hidden="true"></span></button>
+      </div>
+    </div>
+  </footer>
+
+  <aside id="panel" class="panel" hidden aria-label="Innstillinger">
+    <div class="panel-head">
+      <h2>Innstillinger</h2>
+      <button id="panel-close" class="btn btn--icon btn--small" aria-label="Lukk"><span class="icon icon--close" aria-hidden="true"></span></button>
+    </div>
+
+    <fieldset class="segmented">
+      <legend>Teknikk</legend>
+      <label><input type="radio" name="mode" value="1" checked><span>Okklusjon</span></label>
+      <label><input type="radio" name="mode" value="0"><span>Enkel</span></label>
+    </fieldset>
+    <p class="hint" id="mode-hint"></p>
+
+    <label class="range">
+      <span>Styrke <output id="strength-out"></output></span>
+      <input id="strength" type="range" min="0" max="8" step="0.1">
+    </label>
+    <label class="range">
+      <span>Fokusplan <output id="focus-out"></output></span>
+      <input id="focus" type="range" min="0" max="1" step="0.01">
+    </label>
+    <p class="hint">Dobbeltklikk eller dobbelttrykk på maleriet for å fokusere der.</p>
+    <label class="range">
+      <span>Maks steg <output id="steps-out"></output></span>
+      <input id="steps" type="range" min="8" max="128" step="8">
+    </label>
+
+    <div class="toggles">
+      <label><input id="breathe" type="checkbox"> Pust</label>
+      <label><input id="dust" type="checkbox"> Støv i lyset</label>
+      <label><input id="dolly" type="checkbox"> Dolly zoom</label>
+      <label><input id="depth" type="checkbox"> Vis dybdekart</label>
+      <label><input id="fill" type="checkbox"> Fyll skjermen</label>
+      <label><input id="head" type="checkbox"> Følg hodet</label>
+    </div>
+    <p class="hint">«Følg hodet» bruker webkameraet: perspektivet følger hodet ditt. Bildet analyseres
+      bare i nettleseren og lagres eller sendes ikke.</p>
+
+    <section id="head-tuning" class="tuning" hidden aria-label="Justering av hodesporing">
+      <h3>Hodesporing</h3>
+      <canvas id="head-graph" width="624" height="160" aria-label="Rå hodeposisjon mot det som tegnes"></canvas>
+      <p class="legend"><span class="raw">kameraet så</span><span class="out">tegnet</span> sidelengs i cm, siste 2,5 s</p>
+      <dl class="stats">
+        <dt>Kamera</dt><dd id="t-camera">–</dd>
+        <dt>Skjermkort</dt><dd id="t-gpu">–</dd>
+        <dt>Sporing</dt><dd id="t-track">–</dd>
+        <dt>Kamerabilde → resultat</dt><dd id="t-pipeline">–</dd>
+        <dt>Etterslep i filteret</dt><dd id="t-lag">–</dd>
+        <dt>Skjerm → kamera</dt><dd id="t-roundtrip">ikke målt</dd>
+        <dt>Totalt (anslag)</dt><dd id="t-total">–</dd>
+        <dt>Kalibrert</dt><dd id="t-calibrated">nei</dd>
+      </dl>
+      <button id="t-calibrate" class="btn btn--primary btn--wide" type="button">Kalibrer</button>
+      <label class="range">
+        <span>Dybde <output id="t-depth-out"></output></span>
+        <input id="t-depth" type="range" min="0" max="40" step="1">
+      </label>
+      <p class="hint">Bakgrunnen står stille på skjermen, og det som er nærmere kommer mot deg. Dybden er
+        avstanden fra det fjerneste til det nærmeste i motivet, i centimeter. Dobbeltklikk i bildet for å velge
+        hva som skal stå stille.</p>
+      <label class="range">
+        <span>Ro i stillstand <output id="t-mincutoff-out"></output></span>
+        <input id="t-mincutoff" type="range" min="0.1" max="6" step="0.1">
+      </label>
+      <label class="range">
+        <span>Respons i bevegelse <output id="t-beta-out"></output></span>
+        <input id="t-beta" type="range" min="0" max="3" step="0.01">
+      </label>
+      <label class="range">
+        <span>Prediksjon <output id="t-predict-out"></output></span>
+        <input id="t-predict" type="range" min="0" max="150" step="5">
+      </label>
+      <p class="hint">Lavere «ro» gir mindre skjelving når du står stille, men mer etterslep. Høyere «respons» gir
+        mindre etterslep når du beveger deg. «Prediksjon» skjuler forsinkelse, men skyter forbi når du stopper brått.</p>
+      <label class="select">Ansiktsmodellen kjører på
+        <select id="t-delegate">
+          <option value="auto">det raskeste (måles)</option>
+          <option value="GPU">grafikkortet (GPU)</option>
+          <option value="CPU">prosessoren (CPU)</option>
+        </select>
+      </label>
+      <div class="tuning-actions">
+        <button id="t-measure" class="btn" type="button">Mål forsinkelse</button>
+        <button id="t-reset" class="btn" type="button">Tilbakestill</button>
+      </div>
+    </section>
+
+    <div class="clip">
+      <label>Klipp til sosiale medier
+        <select id="clip-format">
+          <option value="4:5">4:5 · feed</option>
+          <option value="9:16">9:16 · story/reels</option>
+          <option value="1:1">1:1</option>
+          <option value="16:9">16:9</option>
+        </select>
+      </label>
+      <button id="record" class="btn"><span>Lag klipp</span><span class="icon icon--video" aria-hidden="true"></span></button>
+    </div>
+
+    <dl class="stats">
+      <dt>Bilder/s</dt><dd id="fps">–</dd>
+      <dt>Steg nå</dt><dd id="steps-now">–</dd>
+      <dt>Dybde</dt><dd id="model">–</dd>
+    </dl>
+
+    <details class="keys">
+      <summary>Hurtigtaster</summary>
+      <p><kbd>←</kbd> <kbd>→</kbd> bytt verk · <kbd>O</kbd> original · <kbd>M</kbd> teknikk · <kbd>D</kbd> dybdekart ·
+        <kbd>B</kbd> pust · <kbd>S</kbd> støv · <kbd>Z</kbd> dolly zoom · <kbd>F</kbd> fyll skjermen · <kbd>C</kbd> følg hodet ·
+        <kbd>R</kbd> lag klipp · <kbd>H</kbd> skjul grensesnitt</p>
+    </details>
+  </aside>
+
+  <aside id="library" class="drawer" hidden aria-label="Hent fra samlingen">
+    <div class="panel-head">
+      <h2>Hent fra samlingen</h2>
+      <button id="library-close" class="btn btn--icon btn--small" aria-label="Lukk"><span class="icon icon--close" aria-hidden="true"></span></button>
+    </div>
+    <p class="hint">Søk i Nasjonalmuseets samling og velg et verk. Bildet hentes via IIIF, og Depth Anything 3
+      lager dybdekartet på denne maskinen.</p>
+    <form id="search-form" class="search" role="search">
+      <input id="search-q" type="search" placeholder="Kunstner, tittel eller motiv" autocomplete="off" aria-label="Søk i samlingen">
+      <select id="search-type" aria-label="Type">
+        <option value="Maleri">Maleri</option>
+        <option value="Fotografi">Fotografi</option>
+        <option value="Tegning">Tegning</option>
+        <option value="Grafikk">Grafikk</option>
+        <option value="">Alle</option>
+      </select>
+      <button class="btn btn--icon" type="submit" aria-label="Søk"><span class="icon icon--search" aria-hidden="true"></span></button>
+    </form>
+    <p id="search-status" class="hint" aria-live="polite"></p>
+    <ul id="results" class="results"></ul>
+  </aside>
+
+  <div id="calibration" class="calibration" hidden role="dialog" aria-modal="true" aria-labelledby="cal-title">
+    <div id="cal-target" class="cal-target" hidden></div>
+    <div id="cal-ruler" class="cal-ruler" hidden>
+      <div id="cal-card-outline" class="cal-card-outline"><span>85,6 mm</span></div>
+      <input id="cal-scale" type="range" min="20" max="80" step="0.1" aria-label="Skjermstørrelse: piksler per centimeter">
+    </div>
+    <div id="cal-card" class="cal-card">
+      <p id="cal-step" class="category"></p>
+      <h2 id="cal-title"></h2>
+      <p id="cal-text"></p>
+      <div class="cal-progress" hidden><span id="cal-bar"></span></div>
+      <div class="cal-actions">
+        <button id="cal-primary" class="btn btn--primary" type="button"><span></span></button>
+        <button id="cal-cancel" class="btn" type="button">Avbryt</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="flash" class="flash" hidden aria-hidden="true"></div>
+  <div id="toast" class="badge" role="status" aria-live="polite"></div>
+  <div id="error" class="error" hidden></div>
+</body>
+</html>

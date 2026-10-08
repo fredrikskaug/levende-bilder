@@ -1,0 +1,20 @@
+# Avhengigheter for tools/*.py. Installeres av tools/setup.ps1, som også tar seg av
+# torch (CUDA- eller CPU-variant) og depth-anything-3 (installeres med --no-deps,
+# siden pakken drar inn mye vi ikke trenger, som xformers, gradio og open3d).
+numpy
+pillow
+huggingface-hub
+safetensors
+einops
+omegaconf
+addict
+opencv-python-headless
+imageio
+tqdm
+# Importeres av depth_anything_3 ved oppstart (eksportmoduler), selv om vi ikke bruker dem
+moviepy==1.0.3
+plyfile
+matplotlib
+pycolmap
+trimesh
+evo

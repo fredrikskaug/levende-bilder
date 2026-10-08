@@ -1,0 +1,2 @@
+# The project uses LF everywhere (the scripts write LF too); keep it on Windows checkouts
+* text=auto eol=lf
