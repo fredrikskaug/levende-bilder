@@ -1,6 +1,7 @@
 import { fullscreenVert, paintingFrag, dustVert, dustFrag } from './shaders.js';
 
 const DUST_COUNT = 700;
+const MAX_OVERSCAN = 0.12; // share cropped from each side, at most
 
 /**
  * Draws one painting with depth-based parallax (+ optional dust) into a WebGL2 canvas.
@@ -64,8 +65,8 @@ export class ParallaxRenderer {
    *                                to the focus plane, as a fraction of the painting width (both axes)
    * @param {number} p.focus        depth (0 far – 1 near) that stays still
    * @param {number} p.dolly        dolly zoom amount
-   * @param {number} p.shiftRange   |shift| to hide behind the overscan; larger shifts fade to black
-   *                                at the edges instead of cropping more
+   * @param {number[]} p.shiftRange |shift| on each axis to hide behind the overscan; larger shifts
+   *                                fade to black at the edges instead of cropping more
    * @param {number} p.dollyRange   largest |dolly| expected
    * @param {number} p.mode         0 = naive offset, 1 = parallax occlusion mapping
    * @param {number} p.maxSteps
@@ -82,10 +83,12 @@ export class ParallaxRenderer {
     const aspect = iw / ih;
     const reach = Math.max(p.focus, 1 - p.focus);
 
-    // Same zoom on both axes keeps the aspect ratio; ease it so toggling dolly doesn't pop
-    const ox = p.shiftRange * reach + 0.5 * p.dollyRange * reach;
-    const oy = p.shiftRange * aspect * reach + 0.5 * p.dollyRange * reach;
-    const target = Math.min(0.25, Math.max(ox, oy) + 0.002);
+    // Same zoom on both axes keeps the aspect ratio; ease it so toggling dolly doesn't pop.
+    // Capped: beyond it the edges fade rather than the whole picture zooming in.
+    const [rx, ry] = p.shiftRange;
+    const ox = rx * reach + 0.5 * p.dollyRange * reach;
+    const oy = ry * aspect * reach + 0.5 * p.dollyRange * reach;
+    const target = Math.min(MAX_OVERSCAN, Math.max(ox, oy) + 0.002);
     this.overscan += (target - this.overscan) * 0.08;
     if (Math.abs(target - this.overscan) < 1e-4) this.overscan = target;
 
@@ -96,8 +99,9 @@ export class ParallaxRenderer {
     // Enough ray-march steps that each step moves ~2 texels across the full depth range. Sized
     // from the *range*, not the current shift: a step count that changes while the camera moves
     // makes depth edges pop by a pixel each time.
-    const reachMax = Math.max(p.shiftRange, Math.hypot(p.shift[0], p.shift[1]));
-    const travel = Math.hypot(reachMax * iw, reachMax * aspect * ih) + 0.5 * Math.max(p.dollyRange, Math.abs(p.dolly)) * iw;
+    const travel =
+      Math.hypot(Math.max(rx, Math.abs(p.shift[0])) * iw, Math.max(ry, Math.abs(p.shift[1])) * iw) +
+      0.5 * Math.max(p.dollyRange, Math.abs(p.dolly)) * iw;
     const steps = Math.max(8, Math.min(p.maxSteps, Math.ceil(travel / 2)));
 
     gl.disable(gl.SCISSOR_TEST);

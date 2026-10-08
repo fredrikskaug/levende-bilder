@@ -13,12 +13,14 @@ const MP_BASE = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.0';
 const MODEL = new URL('../assets/models/face_landmarker.task', import.meta.url).href;
 
 export const IPD_CM = 6.3;     // average adult pupil distance
-const FOV_DEG = 60;            // across the long side of the camera image; only used for your distance
 const LOST_AFTER_MS = 1000;
 const MAX_LEAD_S = 0.25;
 
-/** A phone held in the hand: closer to your face, denser pixels, upright camera image. */
+/** A phone held in the hand: closer to your face, upright camera image, wide front camera. */
 export const PHONE = matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) < 600;
+// Field of view across the long side of the camera image: a typical laptop webcam, and the
+// iPhone front camera (~23 mm equivalent). Only used for how far away you are.
+const FOV_DEG = PHONE ? 74 : 60;
 
 /**
  * Your distance to the camera (cm) from the pupil distance in the image (in image widths).
@@ -34,16 +36,17 @@ export function distanceFromPupils(pupils, aspect) {
 /**
  * In centimetres. minCutoff (Hz): steadiness when still · beta: how fast it opens up when you
  * move · predictMs: extra lead beyond "now" for camera and screen latency (the time since the
- * frame was captured is always extrapolated) · depthCm: how deep the relief is · delegate: where
- * the face model runs ('auto' times GPU and CPU and keeps the faster).
+ * frame was captured is always extrapolated) · depth: how deep the relief is, as a share of the
+ * picture's width (so it looks the same on a phone and a big screen) · delegate: where the face
+ * model runs ('auto' times GPU and CPU and keeps the faster) · preview: show the camera image.
  */
-export const DEFAULT_TUNING = { minCutoff: 0.8, beta: 0.4, dCutoff: 4, predictMs: 30, depthCm: 10, delegate: 'auto' };
+export const DEFAULT_TUNING = { minCutoff: 0.8, beta: 0.4, dCutoff: 4, predictMs: 30, depth: 0.1, delegate: 'auto', preview: false };
 /**
  * center: where your eyes are in the camera image (0–1) when you look straight at the screen ·
- * pupils: your pupil distance in the image (0 = estimate on the fly) · rangeCm: how far you move
- * · pxPerCm: CSS pixels per centimetre on this screen (CSS assumes 96 per inch; phones have ~150).
+ * pupils: your pupil distance in the image (0 = estimate on the fly) · rangeCm, rangeYCm: how far
+ * you move sideways and up and down.
  */
-export const DEFAULT_CALIBRATION = { center: [0.5, 0.5], pupils: 0, rangeCm: PHONE ? 5 : 8, pxPerCm: PHONE ? 60 : 96 / 2.54 };
+export const DEFAULT_CALIBRATION = { center: [0.5, 0.5], pupils: 0, rangeCm: PHONE ? 4 : 6, rangeYCm: PHONE ? 2 : 3 };
 
 export class HeadTracker {
   active = false;
@@ -52,9 +55,10 @@ export class HeadTracker {
   calibration = structuredClone(DEFAULT_CALIBRATION);
   /**
    * cameraFps · trackMs (inference) · pipelineMs (capture → result) · captureLagMs (capture → browser) ·
-   * delegate ('GPU', 'CPU' or 'auto' while timing both) · delegateMs (what each took when timed)
+   * delegate ('GPU', 'CPU' or 'auto' while timing both) · delegateMs (what each took when timed) ·
+   * thread ('worker', or 'main' where MediaPipe doesn't work in a worker)
    */
-  stats = { cameraFps: 0, trackFps: 0, trackMs: 0, pipelineMs: 0, captureLagMs: 0, delegate: '', delegateMs: null };
+  stats = { cameraFps: 0, trackFps: 0, trackMs: 0, pipelineMs: 0, captureLagMs: 0, delegate: '', delegateMs: null, thread: '' };
   /** Latest unfiltered head offset (cm) and its capture time (for the tuning graph) */
   raw = { x: 0, y: 0, t: 0 };
   #autoPupils = 0;
@@ -78,30 +82,26 @@ export class HeadTracker {
     if (!window.isSecureContext) throw new Error('Kameraet krever https eller localhost.');
     if (!navigator.mediaDevices?.getUserMedia) throw new Error('Nettleseren har ikke tilgang til kamera.');
 
-    const worker = new Worker(new URL('./headtrack.worker.js', import.meta.url), { type: 'module' });
-    const ready = new Promise((resolve, reject) => {
-      worker.onmessage = ({ data }) => (data.type === 'ready' ? resolve(data) : reject(new Error(data.message)));
-      worker.onerror = (e) => reject(new Error(e.message || 'Ansiktssporingen kunne ikke starte'));
+    const camera = navigator.mediaDevices.getUserMedia({
+      // Ask for 60 fps: every camera frame interval is latency
+      video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 60 } },
+      audio: false,
     });
-    worker.postMessage({ type: 'init', base: MP_BASE, model: MODEL, delegate: this.tuning.delegate ?? 'auto' });
-
+    const connecting = this.#connect();
+    let worker = null;
     try {
-      const [stream, info] = await Promise.all([
-        navigator.mediaDevices.getUserMedia({
-          // Ask for 60 fps: every camera frame interval is latency
-          video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 60 } },
-          audio: false,
-        }),
-        ready,
-      ]);
-      this.stats.delegate = info.delegate;
+      const [stream, connection] = await Promise.all([camera, connecting]);
+      worker = connection.port;
+      this.stats.delegate = connection.ready.delegate;
       this.stats.delegateMs = null;
+      this.stats.thread = connection.thread;
       this.#stream = stream;
       video.srcObject = stream;
       await video.play();
     } catch (err) {
-      worker.terminate();
-      this.#stream?.getTracks().forEach((t) => t.stop());
+      // Whichever half did start (camera or face model) is let go again
+      connecting.then(({ port }) => close(port)).catch(() => {});
+      camera.then((stream) => stream.getTracks().forEach((t) => t.stop())).catch(() => {});
       this.#stream = null;
       throw err;
     }
@@ -121,12 +121,32 @@ export class HeadTracker {
     this.#nextFrame();
   }
 
+  /**
+   * The face model in a worker, or on the main thread where that fails: in WebKit (every
+   * browser on iPhone) MediaPipe reaches for `document` inside a worker ("Can't find variable:
+   * document"). On the main thread the tracking shares time with drawing, but it works.
+   */
+  async #connect() {
+    const init = { type: 'init', base: MP_BASE, model: MODEL, delegate: this.tuning.delegate ?? 'auto' };
+    let worker = null;
+    try {
+      worker = new Worker(new URL('./headtrack.worker.js', import.meta.url), { type: 'module' });
+      return { port: worker, ready: await handshake(worker, init), thread: 'worker' };
+    } catch (err) {
+      worker?.terminate();
+      console.warn('Face tracking in a worker failed; running it on the main thread.', err);
+    }
+    const { createFaceTracker } = await import('./facetracker.js');
+    const port = mainThreadPort(createFaceTracker);
+    return { port, ready: await handshake(port, init), thread: 'main' };
+  }
+
   stop() {
     this.active = false;
     this.hasFace = false;
     this.#latest?.frame.close();
     this.#latest = null;
-    this.#worker?.postMessage({ type: 'close' });
+    if (this.#worker) close(this.#worker);
     this.#worker = null;
     this.#stream?.getTracks().forEach((t) => t.stop());
     this.#stream = null;
@@ -299,6 +319,37 @@ export class HeadTracker {
     }
     this.#dot.hidden = !this.hasFace;
   }
+}
+
+/** Close the face model; the worker closes itself after that (the main-thread one has nothing to end). */
+function close(port) {
+  port.onmessage = null;
+  port.postMessage({ type: 'close' });
+}
+
+/** Send init to a worker (or look-alike) and wait for it to say it's ready. */
+function handshake(port, init) {
+  return new Promise((resolve, reject) => {
+    port.onmessage = ({ data }) => {
+      if (data.type === 'ready') resolve(data);
+      else if (data.type === 'error') reject(new Error(data.message));
+    };
+    port.onerror = (e) => reject(new Error(e.message || 'Ansiktssporingen kunne ikke starte'));
+    port.postMessage(init);
+  });
+}
+
+/** A worker look-alike that runs the face tracking on the main thread. */
+function mainThreadPort(createFaceTracker) {
+  const port = {
+    onmessage: null,
+    onerror: null,
+    // A task of its own per message, so frames get drawn in between
+    postMessage: (message) => setTimeout(() => handle(message).catch((err) => port.onerror?.(err)), 0),
+    terminate: () => {},
+  };
+  const handle = createFaceTracker((message) => port.onmessage?.({ data: message }));
+  return port;
 }
 
 /** One Euro filter (Casiez et al. 2012): low jitter at low speed, low lag at high speed. Reads its

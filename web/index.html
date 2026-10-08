@@ -115,11 +115,14 @@
       <button id="t-calibrate" class="btn btn--primary btn--wide" type="button">Kalibrer</button>
       <label class="range">
         <span>Dybde <output id="t-depth-out"></output></span>
-        <input id="t-depth" type="range" min="0" max="40" step="1">
+        <input id="t-depth" type="range" min="0" max="0.5" step="0.01">
       </label>
-      <p class="hint">Bakgrunnen står stille på skjermen, og det som er nærmere kommer mot deg. Dybden er
-        avstanden fra det fjerneste til det nærmeste i motivet, i centimeter. Dobbeltklikk i bildet for å velge
-        hva som skal stå stille.</p>
+      <p class="hint">Fokusplanet står stille på skjermen. Det som er nærmere kommer mot deg, og det som er lenger
+        unna glir bakover. Dybden er hvor dypt motivet er, som andel av bildets bredde, så den ser lik ut på
+        mobil og PC.</p>
+      <div class="toggles">
+        <label><input id="t-preview" type="checkbox"> Vis kamerabildet</label>
+      </div>
       <label class="range">
         <span>Ro i stillstand <output id="t-mincutoff-out"></output></span>
         <input id="t-mincutoff" type="range" min="0.1" max="6" step="0.1">
@@ -197,10 +200,6 @@
 
   <div id="calibration" class="calibration" hidden role="dialog" aria-modal="true" aria-labelledby="cal-title">
     <div id="cal-target" class="cal-target" hidden></div>
-    <div id="cal-ruler" class="cal-ruler" hidden>
-      <div id="cal-card-outline" class="cal-card-outline"><span>85,6 mm</span></div>
-      <input id="cal-scale" type="range" min="20" max="80" step="0.1" aria-label="Skjermstørrelse: piksler per centimeter">
-    </div>
     <div id="cal-card" class="cal-card">
       <p id="cal-step" class="category"></p>
       <h2 id="cal-title"></h2>

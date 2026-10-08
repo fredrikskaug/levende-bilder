@@ -74,23 +74,13 @@ function readDepth(bmp) {
   return { w: c.width, h: c.height, data: ctx.getImageData(0, 0, c.width, c.height).data };
 }
 
-/**
- * Depth of the background: sky and distant mountains, or the back wall. A low percentile of the
- * depth map, so a few stray pixels don't decide it.
- */
-function backgroundDepth({ data }) {
-  const values = [];
-  for (let i = 0; i < data.length; i += 4 * 7) values.push(data[i]);
-  values.sort((a, b) => a - b);
-  return values[Math.floor(values.length * 0.05)] / 255;
-}
-
 function loadWork(work) {
   if (!cache.has(work.slug)) {
-    const p = Promise.all([bitmap(work.image), bitmap(work.depth, true)]).then(([image, depth]) => {
-      const depthData = readDepth(depth);
-      return { image, depth, depthData, background: backgroundDepth(depthData) };
-    });
+    const p = Promise.all([bitmap(work.image), bitmap(work.depth, true)]).then(([image, depth]) => ({
+      image,
+      depth,
+      depthData: readDepth(depth),
+    }));
     p.catch(() => cache.delete(work.slug));
     cache.set(work.slug, p);
   }
@@ -132,7 +122,7 @@ async function show(index) {
   renderer.setPainting(assets.image, assets.depth);
   current = assets;
   state.index = index;
-  state.focus = state.focusTarget = defaultFocus(work);
+  state.focus = state.focusTarget = work.focus ?? 0.5;
   renderCaption(work);
   syncPanel();
   if (!EMBED && !KIOSK) history.replaceState(null, '', `?work=${work.slug}`);
@@ -201,7 +191,7 @@ function frame(now) {
   let shift;
   let dolly;
   let focus = state.focus;
-  let shiftRange = 1.2 * strength;
+  let shiftRange = [1.2 * strength, 1.2 * strength]; // x, y
   let dollyRange = Math.max(anim.dolly * 0.22, 0.03);
   state.focus = approach(state.focus, state.focusTarget, dt, 5);
 
@@ -236,11 +226,11 @@ function frame(now) {
     anim.headCm[1] = approach(anim.headCm[1], cm[1], dt, 50);
     if (head.active) recordHeadSamples(now);
     const m = anim.head;
-    const view = m > 0.001 ? headView(rect, dpr) : { shift: [0, 0], range: 0 };
+    const view = m > 0.001 ? headView() : { shift: [0, 0], range: [0, 0] };
     const mix = (a, b) => a + (b - a) * m;
     shift = [mix(orbitShift[0], view.shift[0]) * anim.effect, mix(orbitShift[1], view.shift[1]) * anim.effect];
     dolly = mix(orbitDolly, 0) * anim.effect;
-    shiftRange = mix(shiftRange, view.range);
+    shiftRange = [mix(shiftRange[0], view.range[0]), mix(shiftRange[1], view.range[1])];
   }
   anim.dust = approach(anim.dust, state.dust ? 1 : 0, dt, 2);
   anim.showDepth = approach(anim.showDepth, state.showDepth ? 1 : 0, dt, 6);
@@ -252,7 +242,7 @@ function frame(now) {
     focus,
     dolly,
     // Scaling the ranges by the effect lets the overscan relax, so "original" shows the full canvas
-    shiftRange: shiftRange * anim.effect,
+    shiftRange: shiftRange.map((r) => r * anim.effect),
     dollyRange: dollyRange * anim.effect,
     mode: state.mode,
     maxSteps: state.maxSteps,
@@ -366,7 +356,7 @@ function showHeadStats() {
   const how =
     s.delegate === 'auto'
       ? 'måler GPU og CPU …'
-      : s.delegate + other.map(([d, ms]) => `; ${d} tok ${ms} ms`).join('');
+      : s.delegate + other.map(([d, ms]) => `; ${d} tok ${ms} ms`).join('') + (s.thread === 'main' ? ', hovedtråden' : '');
   $('t-track').textContent = `${s.trackMs.toFixed(0)} ms · ${s.trackFps.toFixed(0)} b/s (${how})`;
   $('t-pipeline').textContent = `${s.pipelineMs.toFixed(0)} ms`;
   $('t-lag').textContent = lag === null ? 'beveg hodet sidelengs' : `${lag} ms`;
@@ -379,7 +369,7 @@ function loadTuning() {
   try {
     Object.assign(head.tuning, JSON.parse(localStorage.getItem(TUNING_KEY) || '{}'));
     const saved = JSON.parse(localStorage.getItem(CALIBRATION_KEY) || 'null');
-    if (saved?.center && saved.pxPerCm) {
+    if (saved?.center && saved.pupils !== undefined) {
       const { at, ...calibration } = saved;
       head.calibration = { ...structuredClone(DEFAULT_CALIBRATION), ...calibration };
       calibratedAt = at;
@@ -421,8 +411,10 @@ function syncTuning() {
   $('t-predict').value = t.predictMs;
   $('t-predict-out').textContent = `${t.predictMs} ms`;
   $('t-delegate').value = t.delegate;
-  $('t-depth').value = t.depthCm;
-  $('t-depth-out').textContent = `${t.depthCm} cm`;
+  $('t-depth').value = t.depth;
+  $('t-depth-out').textContent = `${Math.round(t.depth * 100)} % av bredden`;
+  $('t-preview').checked = t.preview;
+  $('head-preview').classList.toggle('is-hidden', !t.preview);
   $('t-calibrated').textContent = calibratedAt
     ? `ja, ${new Date(calibratedAt).toLocaleString('nb-NO', { dateStyle: 'short', timeStyle: 'short' })}`
     : 'nei';
@@ -449,7 +441,12 @@ function bindTuning() {
   bind('t-mincutoff', 'minCutoff');
   bind('t-beta', 'beta');
   bind('t-predict', 'predictMs');
-  bind('t-depth', 'depthCm');
+  bind('t-depth', 'depth');
+  $('t-preview').addEventListener('change', (e) => {
+    head.tuning.preview = e.target.checked;
+    saveTuning();
+    syncTuning();
+  });
   $('t-delegate').addEventListener('change', async (e) => {
     head.tuning.delegate = e.target.value;
     saveTuning();
@@ -490,19 +487,19 @@ function bindTuning() {
  * moving, not as something far away standing still. (A true window, with real distances, makes
  * distant mountains slide as far as your head moves: on a laptop screen you see almost nothing
  * through it, and every twitch shows.) So the scene is squeezed into a shallow box around the
- * screen: the background (focus) sits on the glass and stays put, nearer things come out
- * towards you and slide against your head movement. The depth comes from how the layers move
- * relative to each other.
+ * screen: the focus plane sits on the glass and stays put, nearer things come out towards you
+ * and slide against your head movement, farther things slide with it. The depth comes from how
+ * the layers move relative to each other.
  *
- * Physically consistent for a box depthCm deep, seen from your distance: a layer d cm behind the
- * glass slides about d / distance of your head movement.
+ * The box is `depth` of the picture's width deep, so it looks the same on a phone and a big
+ * screen. Seen from your distance, a layer d behind the glass slides d / distance of your head
+ * movement; in picture widths that's depth · head / distance.
  */
-function headView(rect, dpr) {
-  const { pxPerCm, rangeCm } = head.calibration;
-  const widthCm = rect.w / dpr / pxPerCm;
-  const k = head.tuning.depthCm / (head.distanceCm * widthCm); // painting widths per cm of head movement and unit of depth
+function headView() {
+  const { rangeCm, rangeYCm } = head.calibration;
+  const k = head.tuning.depth / head.distanceCm; // picture widths per cm of head movement and unit of depth
   const [hx, hy] = anim.headCm.map((v) => clamp(v, -40, 40));
-  return { shift: [hx * k, hy * k], range: rangeCm * k };
+  return { shift: [hx * k, hy * k], range: [rangeCm * k, (rangeYCm ?? rangeCm / 2) * k] };
 }
 
 /** Keep the AI label in the painting's top-right corner, like «Høyoppløst» on nasjonalmuseet.no. */
@@ -690,26 +687,10 @@ function syncPanel() {
   orig.lastElementChild.textContent = state.original ? 'Vis levende' : 'Vis original';
 }
 
-/**
- * The depth that stays still. Following the head, it's the background: the
- * bulk of the picture stays calm on the screen and what's nearer comes towards you.
- */
-function defaultFocus(work) {
-  if (state.head && current) return work.headFocus ?? current.background;
-  return work.focus ?? 0.5;
-}
-
-function resetFocus() {
-  const work = state.works[state.index];
-  if (!work) return;
-  state.focusTarget = defaultFocus(work);
-  syncPanel();
-}
-
 async function setHeadTracking(on) {
   state.head = on;
   $('head-preview').hidden = !on;
-  resetFocus();
+  syncPanel();
   if (!on) {
     head.stop();
     $('head-tuning').hidden = true;
@@ -730,7 +711,7 @@ async function setHeadTracking(on) {
     state.head = false;
     $('head-preview').hidden = true;
     $('head-tuning').hidden = true;
-    resetFocus();
+    syncPanel();
     const messages = { NotAllowedError: 'Tilgang til kameraet ble avslått', NotFoundError: 'Fant ikke noe kamera' };
     toast(messages[err.name] ?? (err.message || 'Kunne ikke starte kameraet'));
   }

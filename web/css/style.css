@@ -292,6 +292,8 @@ kbd { font: 12px var(--sans); border: 1px solid var(--gray-60); border-radius: 3
   width: 128px;
   margin: 0;
 }
+/* Hidden unless «Vis kamerabildet»: invisible but still rendered, so iOS keeps delivering frames */
+.head-preview.is-hidden { opacity: 0; pointer-events: none; }
 .head-frame { position: relative; }
 .head-preview video {
   display: block;
@@ -333,7 +335,6 @@ kbd { font: 12px var(--sans); border: 1px solid var(--gray-60); border-radius: 3
 
 /* Calibration: a target in the middle of the screen, instructions at the bottom */
 .calibration { position: fixed; inset: 0; z-index: 900; background: rgba(0, 0, 0, 0.55); }
-.calibration:has(.cal-ruler:not([hidden])) { background: rgba(0, 0, 0, 0.94); } /* the card outline needs a clean background */
 .cal-target {
   position: absolute;
   left: 50%;
@@ -351,24 +352,6 @@ kbd { font: 12px var(--sans); border: 1px solid var(--gray-60); border-radius: 3
   border-radius: 50%;
   background: var(--yellow);
 }
-.cal-ruler {
-  position: absolute;
-  left: 50%;
-  top: 34%;
-  transform: translate(-50%, -50%);
-  display: grid;
-  justify-items: center;
-  gap: 18px;
-}
-.cal-card-outline {
-  display: grid;
-  place-content: center;
-  border: 2px dashed var(--white);
-  border-radius: 3.2mm;
-  color: var(--gray-30);
-  font-size: 14px;
-}
-.cal-ruler input { width: min(420px, 80vw); accent-color: var(--white); }
 .cal-card {
   position: absolute;
   left: 50%;
@@ -386,11 +369,7 @@ kbd { font: 12px var(--sans); border: 1px solid var(--gray-60); border-radius: 3
 .cal-progress { height: 4px; margin: 18px 0 0; background: var(--gray-80); border-radius: 2px; overflow: hidden; }
 .cal-progress span { display: block; width: 0; height: 100%; background: var(--yellow); }
 .cal-actions { display: flex; gap: 12px; margin-top: 20px; }
-/* Phone: the card stands upright and is taller than the room left. Only its width matters, so the
-   slider goes on top and the dialog may cover the bottom of the outline. */
 @media (max-width: 600px) {
-  .cal-ruler { top: calc(16px + env(safe-area-inset-top)); transform: translateX(-50%); }
-  .cal-ruler input { order: -1; width: calc(100vw - 2 * var(--gutter)); }
   .cal-card { padding: 18px; bottom: calc(12px + env(safe-area-inset-bottom)); }
   .cal-card h2 { font-size: 22px; line-height: 28px; }
   .cal-card p { font-size: 15px; line-height: 21px; }

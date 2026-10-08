@@ -75,8 +75,10 @@ sertifikatadvarselen.
 
 - **Bevegelse**: Trykk på bevegelsesknappen øverst (iOS spør om tillatelse). Uten gyro kan du
   dra med fingeren.
-- **Følg hodet**: Innstillinger → «Følg hodet». Kalibreringen er tilpasset telefon: bankkortet
-  står på høykant (54 mm), og du holder telefonen 30–40 cm fra ansiktet.
+- **Følg hodet**: Innstillinger → «Følg hodet». Hold telefonen 30–40 cm fra ansiktet under
+  kalibreringen. I Safari kjører ansiktssporingen i en Web Worker. I Chrome, Arc og innebygde
+  nettlesere på iPhone feiler MediaPipe der («Can't find variable: document»), og da kjører den
+  på hovedtråden i stedet.
 
 ## Legge til verk og lage dybdekart
 
@@ -100,7 +102,6 @@ sertifikatadvarselen.
    Det tar rundt 2 sekunder per maleri på en RTX 4050.
 
 `focus` og `strength` per verk i `artworks.json` gir startverdiene for fokusplan og styrke.
-`headFocus` overstyrer hvilken dybde som står stille når hodet følges (standard: bakgrunnen).
 
 ## Slik virker det
 
@@ -118,15 +119,17 @@ sertifikatadvarselen.
   flater og vises bare i lyse partier.
 - **Dolly zoom**: Forgrunnen vokser mens bakgrunnen krymper, med fokusplanet låst.
 - **Følg hodet** (`C`, eller `?head` i URL-en): webkameraet følger hodet ditt med MediaPipe
-  Face Landmarker, og perspektivet følger hodet. Alt måles i centimeter: pupillavstanden din
-  (cirka 6,3 cm) er linjalen i kamerabildet, og et bankkort på skjermen gir skjermens størrelse.
-  Står du der du satt under kalibreringen, ser du maleriet rett forfra.
+  Face Landmarker, og perspektivet følger hodet. Hodet måles i centimeter: pupillavstanden din
+  (cirka 6,3 cm) er linjalen i kamerabildet. Står du der du satt under kalibreringen, ser du
+  maleriet rett forfra.
 
-  Motivet presses inn i et grunt relieff rundt skjermen («Dybde», 10 cm). Bakgrunnen (himmel og
-  fjerne fjell, eller bakveggen) står stille på skjermen. Det som er nærmere, kommer ut mot deg
-  og glir mot hodebevegelsen din. Dybden kommer av at lagene beveger seg i forhold til hverandre.
-  Bildet beskjæres bare noen få prosent, og skjelving i sporingen synes knapt, fordi det meste
-  av bildet står stille. Dobbeltklikk i bildet for å velge hva som skal stå stille.
+  Motivet presses inn i et grunt relieff rundt skjermen. Fokusplanet står stille på skjermen;
+  det som er nærmere, kommer ut mot deg og glir mot hodebevegelsen din, og det som er lenger
+  unna glir med den. Dybden kommer av at lagene beveger seg i forhold til hverandre. «Dybde»
+  (standard 10 %) er relieffets dybde som andel av bildets bredde, så det ser likt ut på mobil
+  og PC: en fast dybde i centimeter ble tre ganger så dyp på mobil som på PC i forhold til
+  bildet. Bildet beskjæres bare noen få prosent, og høyst 12 % per side; beveger du deg lenger,
+  toner kantene ut. «Vis kamerabildet» viser deg selv i hjørnet.
 
   Hvorfor ikke et ekte vindu: Vi prøvde med ekte avstander, der fjerne fjell glir like langt som
   hodet ditt. På en flat skjerm ser begge øynene det samme bildet, og de forteller hjernen at alt
@@ -141,20 +144,24 @@ sertifikatadvarselen.
     det gir mindre hopping.
   - Et One Euro-filter holder bildet rolig når du står stille og følger raskt når du beveger deg.
   - Sporingen kjører i en Web Worker (`headtrack.worker.js`), slik at den aldri stopper tegningen.
+    Selve sporingen ligger i `facetracker.js`, slik at den også kan kjøre på hovedtråden der
+    MediaPipe ikke virker i en worker.
   - Shaderen bruker et fast antall steg per maleri, slik at kantene ikke hopper når kameraet beveger seg.
 
   Analysen skjer lokalt i nettleseren, og ingenting lagres eller sendes.
 
-  **Kalibrering** (åpnes første gang, eller Innstillinger → Hodesporing → «Kalibrer»), cirka 30 s:
-  1. Hold et bankkort mot skjermen og dra rammen til den er like bred. Det gir piksler per
-     centimeter.
-  2. Sitt i ro og se på prikken. Det setter hvor «rett forfra» er og hvor stor pupillavstanden
+  **Kalibrering** (åpnes første gang, eller Innstillinger → Hodesporing → «Kalibrer»), cirka 15 s:
+  1. Sitt i ro og se på prikken. Det setter hvor «rett forfra» er og hvor stor pupillavstanden
      din er i kamerabildet, og måler hvor mye sporingen skjelver. «Ro» settes akkurat lavt nok
      til å skjule skjelvingen.
-  3. Beveg hodet fra side til side. Det måler hvor langt og hvor fort du beveger deg.
-     Beskjæringen tilpasses bevegelsesområdet ditt, og «respons» settes etter farten din.
-  4. Skjermen blinker. Det måler forsinkelsen i skjerm og kamera, og prediksjonen settes til
+  2. Beveg hodet fra side til side. Det måler hvor langt (sidelengs og opp/ned hver for seg) og
+     hvor fort du beveger deg. Beskjæringen tilpasses bevegelsesområdet ditt, og «respons»
+     settes etter farten din.
+  3. Skjermen blinker. Det måler forsinkelsen i skjerm og kamera, og prediksjonen settes til
      80 % av den.
+
+  Avstanden din regnes ut fra pupillavstanden og en antatt kameravinkel: 60° for webkamera og
+  74° for frontkameraet på iPhone (langs bildets lange side).
 
   **Måle og justere forsinkelsen** (Innstillinger → Hodesporing, synlig når kameraet går):
   - Grafen viser hva kameraet så (grått) mot det som tegnes (gult). Avstanden mellom kurvene er
@@ -209,8 +216,9 @@ web/
     renderer.js        WebGL2-oppsett og tegning
     input.js           mus, berøring og gyro
     headtrack.js       hodesporing med webkamera: hodeposisjon i cm og One Euro-filter
-    calibration.js     kalibrering: skjermstørrelse, rett forfra, filter, forsinkelse
-    headtrack.worker.js  ansiktssporing (MediaPipe Face Landmarker) utenfor hovedtråden
+    facetracker.js     ansiktssporing (MediaPipe Face Landmarker), i worker eller på hovedtråden
+    calibration.js     kalibrering: rett forfra, filter, forsinkelse
+    headtrack.worker.js  kjører facetracker.js utenfor hovedtråden
     main.js            tilstand, grensesnitt, opptak
   art/works.json       generert manifest
   art/<verk>/          image.jpg + depth.png
