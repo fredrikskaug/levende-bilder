@@ -38,23 +38,26 @@ OBJECT_TYPES = {"Maleri", "Fotografi", "Tegning", "Grafikk"}
 ID_PATTERN = re.compile(r"^[A-Za-z0-9.&_\-]{3,40}$")
 
 DEPTH_ARGS = md.build_parser().parse_args([])
-_model = None
+_models = {}  # depth, lama, device: loaded with the first image
 _job_lock = threading.Lock()  # one image at a time: the GPU and works.json are shared
 
 
 def model_loaded() -> bool:
-    return _model is not None
+    return bool(_models)
 
 
-def get_model():
-    global _model
-    if _model is None:
+def get_models() -> dict:
+    if not _models:
         import torch
+
+        import layers
 
         md.keep_raw_sky()
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        _model = md.load_model(DEPTH_ARGS.model, device)
-    return _model
+        _models["device"] = device
+        _models["depth"] = md.load_model(DEPTH_ARGS.model, device)
+        _models["lama"] = layers.load_lama(device)
+    return _models
 
 
 def search(query: str, object_type: str, take: int = 30) -> list[dict]:
@@ -93,18 +96,22 @@ def add_work(object_id: str, emit) -> None:
         work = fa.fetch_work(entry, 1500)
 
         if not model_loaded():
-            emit({"step": "model", "message": "Laster Depth Anything 3 …"})
-        model = get_model()
+            emit({"step": "model", "message": "Laster Depth Anything 3 og LaMa …"})
+        models = get_models()
 
         emit({"step": "depth", "message": "Lager dybdekart med Depth Anything 3 …"})
         t0 = time.time()
-        image = Image.open(md.WEB_DIR / work["image"])
-        md.depth_map(model, image, DEPTH_ARGS).save(md.WEB_DIR / work["depth"], optimize=True)
+        image = Image.open(md.WEB_DIR / work["image"]).convert("RGB")
+        depth = md.depth_map(models["depth"], image, DEPTH_ARGS)
+        depth.save(md.WEB_DIR / work["depth"], optimize=True)
         work["depthModel"] = DEPTH_ARGS.model.split("/")[-1]
+
+        emit({"step": "layers", "message": "Fyller inn bakgrunnen bak forgrunnen med LaMa …"})
+        md.save_layers(models["lama"], work, image, depth, models["device"])
 
         fa.write_manifest([*fa.read_manifest(), work])
         fa.add_to_artworks(entry)
-        print(f"  ✓ {work['title']} – {work['artist']} ({time.time() - t0:.1f}s dybde)")
+        print(f"  ✓ {work['title']} – {work['artist']} ({time.time() - t0:.1f}s dybde og plate)")
         emit({"done": work})
 
 

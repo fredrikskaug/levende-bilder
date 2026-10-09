@@ -31,7 +31,9 @@
       "institution": "Nasjonalmuseet",
       "license": "CC BY 4.0",
       "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/NG.M.00467_FERDIG50msH_crop.tif/full/1500,/0/default.jpg",
-      "protected": false
+      "protected": false,
+      "background": "art/ng-m-00467/background.jpg",
+      "layers": "art/ng-m-00467/layers.png"
     },
     {
       "id": "NG.M.00844",
@@ -59,7 +61,9 @@
       "focus": 0.7,
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
-      "protected": false
+      "protected": false,
+      "background": "art/ng-m-00844/background.jpg",
+      "layers": "art/ng-m-00844/layers.png"
     },
     {
       "id": "NG.M.01060",
@@ -88,7 +92,9 @@
       "institution": "Nasjonalmuseet",
       "license": "CC BY 4.0",
       "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/147710.tif/full/1500,/0/default.jpg",
-      "protected": false
+      "protected": false,
+      "background": "art/ng-m-01060/background.jpg",
+      "layers": "art/ng-m-01060/layers.png"
     },
     {
       "id": "NG.M.02582",
@@ -116,7 +122,9 @@
       "focus": 0.55,
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
-      "protected": false
+      "protected": false,
+      "background": "art/ng-m-02582/background.jpg",
+      "layers": "art/ng-m-02582/layers.png"
     },
     {
       "id": "NG.M.00320",
@@ -144,7 +152,9 @@
       "focus": 0.65,
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
-      "protected": false
+      "protected": false,
+      "background": "art/ng-m-00320/background.jpg",
+      "layers": "art/ng-m-00320/layers.png"
     },
     {
       "id": "NMK.2008.4921",
@@ -172,7 +182,9 @@
       "focus": 0.6,
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
-      "protected": false
+      "protected": false,
+      "background": "art/nmk-2008-4921/background.jpg",
+      "layers": "art/nmk-2008-4921/layers.png"
     },
     {
       "id": "munch-foto-friluftsatelier-1933",
@@ -199,7 +211,9 @@
       "depth": "art/munch-foto-friluftsatelier-1933/depth.png",
       "focus": 0.6,
       "strength": 1.0,
-      "depthModel": "DA3MONO-LARGE"
+      "depthModel": "DA3MONO-LARGE",
+      "background": "art/munch-foto-friluftsatelier-1933/background.jpg",
+      "layers": "art/munch-foto-friluftsatelier-1933/layers.png"
     },
     {
       "id": "NG.M.00357",
@@ -228,7 +242,9 @@
       "institution": "Nasjonalmuseet",
       "license": "CC BY 4.0",
       "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/136351.tif/full/1500,/0/default.jpg",
-      "protected": false
+      "protected": false,
+      "background": "art/ng-m-00357/background.jpg",
+      "layers": "art/ng-m-00357/layers.png"
     },
     {
       "id": "NMK.2007.6345",
@@ -256,7 +272,9 @@
       "focus": 0.5,
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
-      "protected": false
+      "protected": false,
+      "background": "art/nmk-2007-6345/background.jpg",
+      "layers": "art/nmk-2007-6345/layers.png"
     },
     {
       "id": "NG.M.01725",
@@ -284,7 +302,9 @@
       "focus": 0.6,
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
-      "protected": false
+      "protected": false,
+      "background": "art/ng-m-01725/background.jpg",
+      "layers": "art/ng-m-01725/layers.png"
     },
     {
       "id": "NG.M.01632",
@@ -313,7 +333,9 @@
       "institution": "Nasjonalmuseet",
       "license": "CC BY 4.0",
       "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/37842.tif/full/1500,/0/default.jpg",
-      "protected": false
+      "protected": false,
+      "background": "art/ng-m-01632/background.jpg",
+      "layers": "art/ng-m-01632/layers.png"
     },
     {
       "id": "NG.M.03609",
@@ -341,7 +363,9 @@
       "focus": 0.5,
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
-      "protected": false
+      "protected": false,
+      "background": "art/ng-m-03609/background.jpg",
+      "layers": "art/ng-m-03609/layers.png"
     },
     {
       "id": "NG.M.00943",
@@ -369,7 +393,9 @@
       "focus": 0.5,
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
-      "protected": false
+      "protected": false,
+      "background": "art/ng-m-00943/background.jpg",
+      "layers": "art/ng-m-00943/layers.png"
     },
     {
       "id": "NG.M.00939",
@@ -397,7 +423,9 @@
       "focus": 0.5,
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
-      "protected": false
+      "protected": false,
+      "background": "art/ng-m-00939/background.jpg",
+      "layers": "art/ng-m-00939/layers.png"
     },
     {
       "id": "MS-00444-1988",
@@ -425,7 +453,9 @@
       "depth": "art/ms-00444-1988/depth.png",
       "focus": 0.5,
       "strength": 1.0,
-      "depthModel": "DA3MONO-LARGE"
+      "depthModel": "DA3MONO-LARGE",
+      "background": "art/ms-00444-1988/background.jpg",
+      "layers": "art/ms-00444-1988/layers.png"
     },
     {
       "id": "MS-00063-1988",
@@ -453,7 +483,9 @@
       "depth": "art/ms-00063-1988/depth.png",
       "focus": 0.5,
       "strength": 1.0,
-      "depthModel": "DA3MONO-LARGE"
+      "depthModel": "DA3MONO-LARGE",
+      "background": "art/ms-00063-1988/background.jpg",
+      "layers": "art/ms-00063-1988/layers.png"
     },
     {
       "id": "NMK.2006.0117",
@@ -485,7 +517,9 @@
       "depth": "art/nmk-2006-0117/depth.png",
       "focus": 0.5,
       "strength": 1.0,
-      "depthModel": "DA3MONO-LARGE"
+      "depthModel": "DA3MONO-LARGE",
+      "background": "art/nmk-2006-0117/background.jpg",
+      "layers": "art/nmk-2006-0117/layers.png"
     },
     {
       "id": "NG.M.00302-011",
@@ -513,7 +547,9 @@
       "depth": "art/ng-m-00302-011/depth.png",
       "focus": 0.5,
       "strength": 1.0,
-      "depthModel": "DA3MONO-LARGE"
+      "depthModel": "DA3MONO-LARGE",
+      "background": "art/ng-m-00302-011/background.jpg",
+      "layers": "art/ng-m-00302-011/layers.png"
     }
   ]
 }

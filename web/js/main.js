@@ -33,6 +33,7 @@ const state = {
   dust: false,
   dolly: false,
   showDepth: false,
+  layers: true,     // AI-filled background behind foreground edges, where the work has one
   original: false,
   head: false,
   // contain: inside the layout next to the UI · fill: as large as possible on the whole screen, never cropped
@@ -76,11 +77,14 @@ function readDepth(bmp) {
 
 function loadWork(work) {
   if (!cache.has(work.slug)) {
-    const p = Promise.all([bitmap(work.image), bitmap(work.depth, true)]).then(([image, depth]) => ({
-      image,
-      depth,
-      depthData: readDepth(depth),
-    }));
+    // The background plate (tools/layers.py) is optional: without it the edges stretch as before
+    const optional = (url, raw) => (url ? bitmap(url, raw).catch(() => null) : null);
+    const p = Promise.all([
+      bitmap(work.image),
+      bitmap(work.depth, true),
+      optional(work.background),
+      optional(work.layers, true),
+    ]).then(([image, depth, plate, layers]) => ({ image, depth, plate, layers, depthData: readDepth(depth) }));
     p.catch(() => cache.delete(work.slug));
     cache.set(work.slug, p);
   }
@@ -119,7 +123,7 @@ async function show(index) {
   });
   if (!assets || token !== showToken) return;
 
-  renderer.setPainting(assets.image, assets.depth);
+  renderer.setPainting(assets.image, assets.depth, assets.plate, assets.layers);
   current = assets;
   state.index = index;
   state.focus = state.focusTarget = work.focus ?? 0.5;
@@ -251,6 +255,7 @@ function frame(now) {
     fade: anim.fade,
     dust: anim.dust * anim.effect,
     time: t,
+    layered: state.layers,
   });
 
   if (rec) rec.compose(work);
@@ -678,6 +683,7 @@ function syncPanel() {
   $('dust').checked = state.dust;
   $('dolly').checked = state.dolly;
   $('depth').checked = state.showDepth;
+  $('layers').checked = state.layers;
   $('fill').checked = state.fit === 'fill';
   document.body.classList.toggle('fill', state.fit === 'fill');
   $('head').checked = state.head;
@@ -868,7 +874,7 @@ async function bindLibrary() {
 }
 
 function bindUI() {
-  const toggles = { breathe: 'breathe', dust: 'dust', dolly: 'dolly', depth: 'showDepth' };
+  const toggles = { breathe: 'breathe', dust: 'dust', dolly: 'dolly', depth: 'showDepth', layers: 'layers' };
   for (const [id, key] of Object.entries(toggles)) {
     $(id).addEventListener('change', (e) => (state[key] = e.target.checked));
   }
@@ -977,6 +983,7 @@ function bindUI() {
       state.mode = state.mode ? 0 : 1;
       toast(state.mode ? 'Okklusjon (POM)' : 'Enkel forskyvning');
     } else if (key === 'd') flip('showDepth', 'Dybdekart');
+    else if (key === 'l') flip('layers', 'Utfylt bakgrunn');
     else if (key === 'b') flip('breathe', 'Pust');
     else if (key === 's') flip('dust', 'Støv');
     else if (key === 'z') flip('dolly', 'Dolly zoom');

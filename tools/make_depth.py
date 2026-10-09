@@ -5,10 +5,13 @@ som er laget for relativ dybde fra ett enkelt bilde. Hovedserien (DA3-LARGE o.l.
 laget for geometri fra flere bilder, og ser et maleri som en flat flate.
 
 Resultatet lagres som en 8-bits gråtone-PNG ved siden av bildet. Hvit betyr nær
-og svart betyr langt unna.
+og svart betyr langt unna. I tillegg lages en bakgrunnsplate (background.jpg) og et lagkart
+(layers.png) med LaMa, slik at man ser bakgrunn og ikke strukne piksler bak nære ting når
+perspektivet flytter seg (se layers.py).
 
     python tools/make_depth.py                         # alle verk
     python tools/make_depth.py --only NG.M.00939       # bare ett
+    python tools/make_depth.py --only-layers           # bare bakgrunnsplatene, fra dybdekartene som finnes
     python tools/make_depth.py --mapping disparity --res 756
 """
 
@@ -16,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 import time
 from pathlib import Path
 
@@ -24,6 +28,7 @@ import torch
 import torch.nn.functional as F
 from PIL import Image
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # layers.py, also when run with python -I
 ROOT = Path(__file__).resolve().parent.parent
 WEB_DIR = ROOT / "web"
 MANIFEST = WEB_DIR / "art" / "works.json"
@@ -167,29 +172,58 @@ def build_parser() -> argparse.ArgumentParser:
                         help="snitt av original og speilvendt bilde (jevnere kart)")
     parser.add_argument("--dilate", type=int, default=3, help="piksler forgrunnen vokses med")
     parser.add_argument("--blur", type=float, default=1.2, help="gaussisk uskarphet (sigma, piksler)")
+    parser.add_argument("--layers", action=argparse.BooleanOptionalAction, default=True,
+                        help="bakgrunnsplate med LaMa bak forgrunnskantene")
+    parser.add_argument("--only-layers", action="store_true", help="ikke lag dybdekartene på nytt, bare platene")
     parser.add_argument("--only", nargs="*", help="bare disse objekt-ID-ene")
     return parser
 
 
+def save_layers(lama, work: dict, image: Image.Image, depth: Image.Image, device: torch.device) -> float:
+    """Background plate and layers map next to the image; returns the share that was filled in."""
+    import layers
+
+    plate, layer_map, share = layers.make_layers(lama, image, depth, device)
+    folder = (WEB_DIR / work["image"]).parent
+    plate.save(folder / "background.jpg", quality=90, optimize=True)
+    layer_map.save(folder / "layers.png", optimize=True)
+    base = work["image"].rsplit("/", 1)[0]
+    work["background"] = f"{base}/background.jpg"
+    work["layers"] = f"{base}/layers.png"
+    return share
+
+
 def main() -> None:
+    sys.stdout.reconfigure(encoding="utf-8")  # ✓ and × also when the console isn't UTF-8
     args = build_parser().parse_args()
 
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     works = [w for w in manifest["works"] if not args.only or w["id"] in args.only]
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Laster {args.model} på {device} …")
-    keep_raw_sky()
-    model = load_model(args.model, device)
+    model = None
+    if not args.only_layers:
+        print(f"Laster {args.model} på {device} …")
+        keep_raw_sky()
+        model = load_model(args.model, device)
+    lama = None
+    if args.layers or args.only_layers:
+        import layers
+
+        lama = layers.load_lama(device)
 
     for work in works:
         t0 = time.time()
         image = Image.open(WEB_DIR / work["image"]).convert("RGB")
-        depth_map(model, image, args).save(WEB_DIR / work["depth"], optimize=True)
-
-        work["depthModel"] = args.model.split("/")[-1]
-        work.pop("depthRatio", None)  # from an earlier version
-        print(f"  ✓ {work['title']:<32} {image.size[0]}×{image.size[1]}  {time.time() - t0:.1f}s")
+        if model:
+            depth_map(model, image, args).save(WEB_DIR / work["depth"], optimize=True)
+            work["depthModel"] = args.model.split("/")[-1]
+            work.pop("depthRatio", None)  # from an earlier version
+        note = ""
+        if lama:
+            share = save_layers(lama, work, image, Image.open(WEB_DIR / work["depth"]), device)
+            note = f"  plate {share * 100:4.1f} %"
+        print(f"  ✓ {work['title']:<32} {image.size[0]}×{image.size[1]}{note}  {time.time() - t0:.1f}s")
 
     MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
 

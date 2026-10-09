@@ -9,6 +9,7 @@ einops
 omegaconf
 addict
 opencv-python-headless
+scipy  # layers.py: avstandskart for bakgrunnsplaten
 imageio
 tqdm
 # Importeres av depth_anything_3 ved oppstart (eksportmoduler), selv om vi ikke bruker dem

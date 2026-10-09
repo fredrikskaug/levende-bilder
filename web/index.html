@@ -94,9 +94,12 @@
       <label><input id="depth" type="checkbox"> Vis dybdekart</label>
       <label><input id="fill" type="checkbox"> Fyll skjermen</label>
       <label><input id="head" type="checkbox"> Følg hodet</label>
+      <label><input id="layers" type="checkbox"> Utfylt bakgrunn</label>
     </div>
     <p class="hint">«Følg hodet» bruker webkameraet: perspektivet følger hodet ditt. Bildet analyseres
       bare i nettleseren og lagres eller sendes ikke.</p>
+    <p class="hint">«Utfylt bakgrunn»: bak kantene på nære ting har en KI-modell (LaMa) fylt inn det som
+      skjules, så du ser bakgrunn i stedet for strukne piksler når perspektivet flytter seg.</p>
 
     <section id="head-tuning" class="tuning" hidden aria-label="Justering av hodesporing">
       <h3>Hodesporing</h3>
@@ -171,7 +174,7 @@
     <details class="keys">
       <summary>Hurtigtaster</summary>
       <p><kbd>←</kbd> <kbd>→</kbd> bytt verk · <kbd>O</kbd> original · <kbd>M</kbd> teknikk · <kbd>D</kbd> dybdekart ·
-        <kbd>B</kbd> pust · <kbd>S</kbd> støv · <kbd>Z</kbd> dolly zoom · <kbd>F</kbd> fyll skjermen · <kbd>C</kbd> følg hodet ·
+        <kbd>L</kbd> utfylt bakgrunn · <kbd>B</kbd> pust · <kbd>S</kbd> støv · <kbd>Z</kbd> dolly zoom · <kbd>F</kbd> fyll skjermen · <kbd>C</kbd> følg hodet ·
         <kbd>R</kbd> lag klipp · <kbd>H</kbd> skjul grensesnitt</p>
     </details>
   </aside>

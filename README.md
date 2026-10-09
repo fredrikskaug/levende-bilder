@@ -85,7 +85,7 @@ sertifikatadvarselen.
 ```powershell
 .\tools\setup.ps1                      # Python 3.12-venv med CUDA-torch og Depth Anything 3 (-Cpu for bare CPU)
 .\.venv\Scripts\python tools\fetch_artworks.py   # henter bilder (1500 px) og metadata via IIIF
-.\.venv\Scripts\python tools\make_depth.py       # lager web/art/<verk>/depth.png
+.\.venv\Scripts\python tools\make_depth.py       # lager depth.png og bakgrunnsplaten (LaMa)
 ```
 
 1. Legg til objekt-ID-en (for eksempel `NG.M.00844` eller `NMK.2007.6426`) i
@@ -99,7 +99,9 @@ sertifikatadvarselen.
    `artworks.json`.
 3. `make_depth.py` kjører `DA3MONO-LARGE`, tar snittet av originalen og et speilvendt bilde,
    presser himmelen bakover, vokser forgrunnen litt og lagrer en 8-bits PNG.
-   Det tar rundt 2 sekunder per maleri på en RTX 4050.
+   Deretter lager den en bakgrunnsplate med LaMa (se «Utfylt bakgrunn» under).
+   Det tar rundt 2–4 sekunder per maleri på en RTX 4050. `--only-layers` lager bare platene
+   fra dybdekartene som finnes, og `--no-layers` hopper over dem.
 
 `focus` og `strength` per verk i `artworks.json` gir startverdiene for fokusplan og styrke.
 
@@ -114,6 +116,25 @@ sertifikatadvarselen.
   «Okklusjon» følger synslinjen gjennom dybdekartet fra forgrunnen og bakover
   (parallax occlusion mapping), slik at forgrunnen dekker bakgrunnen riktig.
   Antall steg tilpasses hvor langt bildet faktisk flyttes.
+- **Utfylt bakgrunn** (`L`, `tools/layers.py`): Med ett dybdekart finnes det ingenting bak et
+  hode foran sjøen, så når perspektivet flytter seg, ble kantpikslene strukket ut i striper.
+  Nå deles bildet i to lag, som i [3D Photo Inpainting](https://arxiv.org/abs/2004.04727) og
+  [SLIDE](https://arxiv.org/abs/2109.01068):
+  - Der dybden faller brått, er det en forgrunnskant. Et bånd innenfor kanten kan bli
+    avdekket; bredden er maks forskyvning (5 % av bildebredden) ganger dybdehoppet.
+  - [LaMa](https://github.com/advimman/lama) (Apache 2.0) fyller inn bakgrunnen i båndet. Den får et
+    større hull enn båndet (smale figurer forsvinner helt), så den bare ser bakgrunnen og ikke
+    maler figuren inn igjen. Bakgrunnsdybden fortsetter fra foten av kanten.
+  - Skyggeleggeren marsjerer begge lagene: en synslinje som kommer inn under forgrunnskanten fra
+    siden, går under den og treffer platen i stedet for å strekke kanten.
+  - `background.jpg` er platen (ensfarget utenfor båndene, så den blir liten), og `layers.png`
+    har dybden bak (R) og båndet (G).
+
+  Står du rett foran, vises bare originalpikslene: platen brukes kun i de smale stripene som
+  avdekkes når du beveger deg (rundt 0,1 % av bildet ved 3 % forskyvning). Det oppdiktede er
+  derfor lite synlig, men det er KI-generert innhold, og det dekkes av merket «Dybdeeffekt laget
+  med KI». LaMa-vektene (~200 MB, TorchScript fra IOPaint) lastes ned første gang og
+  kontrolleres mot sjekksum. Verk uten plate vises som før.
 - **Pust**: Når ingen rører musa, går kameraet i en langsom bane.
 - **Støv i lyset**: Partikler på ulike dybder følger samme parallakse, skjules bak nærmere
   flater og vises bare i lyse partier.
@@ -196,7 +217,7 @@ sertifikatadvarselen.
 | `/?kiosk` | Skjerm i museet: fyller skjermen uten grensesnitt, med pust, bytter verk hvert 25. sekund (piltastene virker også) |
 | `/?kiosk&head` | Som over, men perspektivet følger hodet til den som står foran (webkamera) |
 
-Hurtigtaster: `←` `→` bytt verk · `O` original · `M` teknikk · `D` dybdekart · `B` pust · `S` støv ·
+Hurtigtaster: `←` `→` bytt verk · `O` original · `M` teknikk · `D` dybdekart · `L` utfylt bakgrunn · `B` pust · `S` støv ·
 `Z` dolly zoom · `F` fyll skjermen (så stort som mulig uten beskjæring; grensesnittet skjules når musa er i ro) · `C` følg hodet · `R` lag klipp · `H` skjul grensesnitt.
 Dobbeltklikk på maleriet for å sette fokusplanet der.
 
@@ -206,7 +227,8 @@ Dobbeltklikk på maleriet for å sette fokusplanet der.
 tools/
   artworks.json        kuraterte verk med startverdier
   fetch_artworks.py    IIIF-nedlasting og metadata
-  make_depth.py        Depth Anything 3 → depth.png
+  make_depth.py        Depth Anything 3 → depth.png, og bakgrunnsplaten
+  layers.py            forgrunnsbånd ved dybdehopp + LaMa → background.jpg, layers.png
   server.py            søk i samlingen + dybdekart på forespørsel (demosiden)
   setup.ps1            Python-miljø
 web/
@@ -221,7 +243,7 @@ web/
     headtrack.worker.js  kjører facetracker.js utenfor hovedtråden
     main.js            tilstand, grensesnitt, opptak
   art/works.json       generert manifest
-  art/<verk>/          image.jpg + depth.png
+  art/<verk>/          image.jpg, depth.png, background.jpg, layers.png
 ```
 
 ## Design

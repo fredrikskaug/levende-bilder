@@ -52,6 +52,11 @@ uniform float uShowDepth;   // 0..1 blend towards the depth visualisation
 uniform float uFocusFlash;  // 0..1 highlights the focus plane
 uniform float uFade;        // 0..1 used when switching paintings
 uniform vec3 uBackground;
+// What's behind the foreground near its edges (tools/layers.py): the picture with a band inside
+// every edge filled in by LaMa, and r: the depth there, g: 1 in that band
+uniform sampler2D uPlate;
+uniform sampler2D uLayers;
+uniform bool uLayered;
 
 ${COMMON}
 
@@ -91,6 +96,50 @@ vec2 parallaxOcclusion(vec2 q, out float hit) {
   return project(q, hit);
 }
 
+// Two layers: the band inside each foreground edge is a thin sheet with the plate behind it.
+// A ray that comes down from above hits the sheet as before. One that reaches the band from the
+// side, below its edge, has passed under it: it carries on to the plate, whose depth continues
+// from the foot of the edge, and shows what LaMa filled in instead of a smeared edge.
+vec2 parallaxLayered(vec2 q, out float hit, out bool onPlate) {
+  float stepSize = 1.0 / float(uSteps);
+  float sheet = 1.5 * stepSize;  // how far below the edge a ray still counts as hitting it
+  float z = 1.0;
+  float prevZ = z;
+  vec2 prevUv = project(q, z);
+  bool prevInBand = textureLod(uLayers, prevUv, 0.0).g > 0.5;
+  bool under = false;
+  for (int i = 0; i < 256; i++) {
+    vec2 uv = project(q, z);
+    vec2 layers = textureLod(uLayers, uv, 0.0).rg;  // r: depth of the plate, g: inside a band
+    float front = depthAt(uv);
+    bool inBand = layers.g > 0.5;
+    if (!inBand) under = false;
+    else if (!prevInBand && z < front - sheet) under = true;  // came in from the side, below the edge
+
+    bool hitFront = inBand && !under && z <= front;
+    bool hitPlate = z <= layers.r;  // outside the bands the plate is the picture itself
+    if (hitFront || hitPlate || i >= uSteps) {
+      // Outside the bands the plate is the picture: take the original, not the re-encoded plate
+      onPlate = !hitFront && inBand;
+      // Refine between the last step above the surface that was hit and this one
+      float hPrev = hitFront ? depthAt(prevUv) : textureLod(uLayers, prevUv, 0.0).r;
+      float hNow = hitFront ? front : layers.r;
+      float before = prevZ - hPrev;
+      float after = z - hNow;
+      float t = before > 0.0 ? clamp(before / max(before - after, 1e-5), 0.0, 1.0) : 1.0;
+      hit = mix(prevZ, z, t);
+      return project(q, hit);
+    }
+    prevZ = z;
+    prevUv = uv;
+    prevInBand = inBand;
+    z -= stepSize;
+  }
+  onPlate = false;
+  hit = z;
+  return project(q, z);
+}
+
 // Depth palette: far = deep blue, near = warm white
 vec3 depthPalette(float t) {
   vec3 a = vec3(0.05, 0.06, 0.20);
@@ -105,10 +154,14 @@ vec3 depthPalette(float t) {
 void main() {
   vec2 q = imgToQ(vImg);
   float hit;
-  vec2 uv = uMode == 0 ? parallaxNaive(q, hit) : parallaxOcclusion(q, hit);
+  bool onPlate = false;
+  vec2 uv = uMode == 0 ? parallaxNaive(q, hit)
+          : uLayered ? parallaxLayered(q, hit, onPlate)
+          : parallaxOcclusion(q, hit);
 
   // Use the undisplaced gradients for mip selection, otherwise depth edges pick blurry mips
-  vec3 col = textureGrad(uImage, uv, dFdx(q), dFdy(q)).rgb;
+  vec3 col = onPlate ? textureGrad(uPlate, uv, dFdx(q), dFdy(q)).rgb
+                     : textureGrad(uImage, uv, dFdx(q), dFdy(q)).rgb;
   // Content moved in from beyond the painting's edge (head tracking past the overscan) fades
   // to the background instead of smearing the edge pixels
   vec2 edge = min(uv, 1.0 - uv);

@@ -27,19 +27,27 @@ export class ParallaxRenderer {
     this.aniso = gl.getExtension('EXT_texture_filter_anisotropic');
     this.image = null;
     this.depth = null;
+    this.plate = null;   // background plate and layers map (tools/layers.py), when the work has them
+    this.layers = null;
     this.size = [1, 1];
     this.overscan = 0;
     this.background = [0.039, 0.039, 0.043];
   }
 
   /** Replace the textures with a new painting and its depth map (ImageBitmaps). */
-  setPainting(imageBitmap, depthBitmap) {
+  setPainting(imageBitmap, depthBitmap, plateBitmap = null, layersBitmap = null) {
     const gl = this.gl;
-    if (this.image) gl.deleteTexture(this.image);
-    if (this.depth) gl.deleteTexture(this.depth);
+    for (const tex of [this.image, this.depth, this.plate, this.layers]) if (tex) gl.deleteTexture(tex);
     this.image = this.#texture(imageBitmap, gl.RGBA8, gl.RGBA, true);
     this.depth = this.#texture(depthBitmap, gl.R8, gl.RED, false);
+    const layered = plateBitmap && layersBitmap;
+    this.plate = layered ? this.#texture(plateBitmap, gl.RGBA8, gl.RGBA, true) : null;
+    this.layers = layered ? this.#texture(layersBitmap, gl.RG8, gl.RG, false) : null;
     this.size = [imageBitmap.width, imageBitmap.height];
+  }
+
+  get hasLayers() {
+    return Boolean(this.plate);
   }
 
   /**
@@ -75,6 +83,7 @@ export class ParallaxRenderer {
    * @param {number} p.fade         0..1
    * @param {number} p.dust         0..1 dust intensity
    * @param {number} p.time         seconds
+   * @param {boolean} p.layered     use the background plate behind foreground edges, if there is one
    */
   render(p) {
     const gl = this.gl;
@@ -119,6 +128,13 @@ export class ParallaxRenderer {
     gl.bindTexture(gl.TEXTURE_2D, this.image);
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, this.depth);
+    const layered = Boolean(p.layered && this.plate);
+    if (layered) {
+      gl.activeTexture(gl.TEXTURE2);
+      gl.bindTexture(gl.TEXTURE_2D, this.plate);
+      gl.activeTexture(gl.TEXTURE3);
+      gl.bindTexture(gl.TEXTURE_2D, this.layers);
+    }
 
     const common = (prog) => {
       this.#set(prog, 'uImage', 0, 'i');
@@ -138,6 +154,9 @@ export class ParallaxRenderer {
     this.#set(painting, 'uFocusFlash', p.focusFlash);
     this.#set(painting, 'uFade', p.fade);
     this.#set(painting, 'uBackground', this.background);
+    this.#set(painting, 'uPlate', 2, 'i');
+    this.#set(painting, 'uLayers', 3, 'i');
+    this.#set(painting, 'uLayered', layered ? 1 : 0, 'i');
     gl.disable(gl.BLEND);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
