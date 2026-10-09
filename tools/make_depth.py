@@ -225,7 +225,7 @@ def main() -> None:
             note = f"  plate {share * 100:4.1f} %"
         print(f"  ✓ {work['title']:<32} {image.size[0]}×{image.size[1]}{note}  {time.time() - t0:.1f}s")
 
-    MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+    MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8", newline="\n")
 
 
 if __name__ == "__main__":
