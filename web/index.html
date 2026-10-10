@@ -94,12 +94,15 @@
       <label><input id="depth" type="checkbox"> Vis dybdekart</label>
       <label><input id="fill" type="checkbox"> Fyll skjermen</label>
       <label><input id="head" type="checkbox"> Følg hodet</label>
-      <label><input id="layers" type="checkbox"> Utfylt bakgrunn</label>
+      <label><input id="layers" type="checkbox"> Dybdelag</label>
+      <label><input id="debug-ai" type="checkbox"> Marker KI-utfylling</label>
     </div>
     <p class="hint">«Følg hodet» bruker webkameraet: perspektivet følger hodet ditt. Bildet analyseres
       bare i nettleseren og lagres eller sendes ikke.</p>
-    <p class="hint">«Utfylt bakgrunn»: bak kantene på nære ting har en KI-modell (LaMa) fylt inn det som
-      skjules, så du ser bakgrunn i stedet for strukne piksler når perspektivet flytter seg.</p>
+    <p class="hint">«Dybdelag»: maleriet er delt i lag der dybden hopper, og bak hvert lag har en KI-modell
+      (LaMa) fylt inn det nærmere lag dekker. Når perspektivet flytter seg, skilles lagene i stedet for at
+      kantene strekkes. Det utfylte vises bare der maleriet ikke har noe å vise; står du rett foran, ser du
+      bare originalen. «Marker KI-utfylling» viser det utfylte i rosa.</p>
 
     <section id="head-tuning" class="tuning" hidden aria-label="Justering av hodesporing">
       <h3>Hodesporing</h3>
@@ -174,7 +177,7 @@
     <details class="keys">
       <summary>Hurtigtaster</summary>
       <p><kbd>←</kbd> <kbd>→</kbd> bytt verk · <kbd>O</kbd> original · <kbd>M</kbd> teknikk · <kbd>D</kbd> dybdekart ·
-        <kbd>L</kbd> utfylt bakgrunn · <kbd>B</kbd> pust · <kbd>S</kbd> støv · <kbd>Z</kbd> dolly zoom · <kbd>F</kbd> fyll skjermen · <kbd>C</kbd> følg hodet ·
+        <kbd>L</kbd> dybdelag · <kbd>K</kbd> marker KI-utfylling · <kbd>B</kbd> pust · <kbd>S</kbd> støv · <kbd>Z</kbd> dolly zoom · <kbd>F</kbd> fyll skjermen · <kbd>C</kbd> følg hodet ·
         <kbd>R</kbd> lag klipp · <kbd>H</kbd> skjul grensesnitt</p>
     </details>
   </aside>

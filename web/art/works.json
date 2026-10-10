@@ -32,8 +32,38 @@
       "license": "CC BY 4.0",
       "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/NG.M.00467_FERDIG50msH_crop.tif/full/1500,/0/default.jpg",
       "protected": false,
-      "background": "art/ng-m-00467/background.jpg",
-      "layers": "art/ng-m-00467/layers.png"
+      "layers": [
+        {
+          "color": "art/ng-m-00467/layer0.jpg",
+          "alpha": "art/ng-m-00467/layer0-alpha.png",
+          "depth": "art/ng-m-00467/layer0-depth.png"
+        },
+        {
+          "color": "art/ng-m-00467/layer1.jpg",
+          "alpha": "art/ng-m-00467/layer1-alpha.png",
+          "depth": "art/ng-m-00467/layer1-depth.png"
+        },
+        {
+          "color": "art/ng-m-00467/layer2.jpg",
+          "alpha": "art/ng-m-00467/layer2-alpha.png",
+          "depth": "art/ng-m-00467/layer2-depth.png"
+        },
+        {
+          "color": "art/ng-m-00467/layer3.jpg",
+          "alpha": "art/ng-m-00467/layer3-alpha.png",
+          "depth": "art/ng-m-00467/layer3-depth.png"
+        },
+        {
+          "color": "art/ng-m-00467/layer4.jpg",
+          "alpha": "art/ng-m-00467/layer4-alpha.png",
+          "depth": "art/ng-m-00467/layer4-depth.png"
+        },
+        {
+          "color": "art/ng-m-00467/layer5.jpg",
+          "alpha": "art/ng-m-00467/layer5-alpha.png",
+          "depth": "art/ng-m-00467/layer5-depth.png"
+        }
+      ]
     },
     {
       "id": "NG.M.00844",
@@ -62,8 +92,38 @@
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
       "protected": false,
-      "background": "art/ng-m-00844/background.jpg",
-      "layers": "art/ng-m-00844/layers.png"
+      "layers": [
+        {
+          "color": "art/ng-m-00844/layer0.jpg",
+          "alpha": "art/ng-m-00844/layer0-alpha.png",
+          "depth": "art/ng-m-00844/layer0-depth.png"
+        },
+        {
+          "color": "art/ng-m-00844/layer1.jpg",
+          "alpha": "art/ng-m-00844/layer1-alpha.png",
+          "depth": "art/ng-m-00844/layer1-depth.png"
+        },
+        {
+          "color": "art/ng-m-00844/layer2.jpg",
+          "alpha": "art/ng-m-00844/layer2-alpha.png",
+          "depth": "art/ng-m-00844/layer2-depth.png"
+        },
+        {
+          "color": "art/ng-m-00844/layer3.jpg",
+          "alpha": "art/ng-m-00844/layer3-alpha.png",
+          "depth": "art/ng-m-00844/layer3-depth.png"
+        },
+        {
+          "color": "art/ng-m-00844/layer4.jpg",
+          "alpha": "art/ng-m-00844/layer4-alpha.png",
+          "depth": "art/ng-m-00844/layer4-depth.png"
+        },
+        {
+          "color": "art/ng-m-00844/layer5.jpg",
+          "alpha": "art/ng-m-00844/layer5-alpha.png",
+          "depth": "art/ng-m-00844/layer5-depth.png"
+        }
+      ]
     },
     {
       "id": "NG.M.01060",
@@ -93,8 +153,43 @@
       "license": "CC BY 4.0",
       "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/147710.tif/full/1500,/0/default.jpg",
       "protected": false,
-      "background": "art/ng-m-01060/background.jpg",
-      "layers": "art/ng-m-01060/layers.png"
+      "layers": [
+        {
+          "color": "art/ng-m-01060/layer0.jpg",
+          "alpha": "art/ng-m-01060/layer0-alpha.png",
+          "depth": "art/ng-m-01060/layer0-depth.png"
+        },
+        {
+          "color": "art/ng-m-01060/layer1.jpg",
+          "alpha": "art/ng-m-01060/layer1-alpha.png",
+          "depth": "art/ng-m-01060/layer1-depth.png"
+        },
+        {
+          "color": "art/ng-m-01060/layer2.jpg",
+          "alpha": "art/ng-m-01060/layer2-alpha.png",
+          "depth": "art/ng-m-01060/layer2-depth.png"
+        },
+        {
+          "color": "art/ng-m-01060/layer3.jpg",
+          "alpha": "art/ng-m-01060/layer3-alpha.png",
+          "depth": "art/ng-m-01060/layer3-depth.png"
+        },
+        {
+          "color": "art/ng-m-01060/layer4.jpg",
+          "alpha": "art/ng-m-01060/layer4-alpha.png",
+          "depth": "art/ng-m-01060/layer4-depth.png"
+        },
+        {
+          "color": "art/ng-m-01060/layer5.jpg",
+          "alpha": "art/ng-m-01060/layer5-alpha.png",
+          "depth": "art/ng-m-01060/layer5-depth.png"
+        },
+        {
+          "color": "art/ng-m-01060/layer6.jpg",
+          "alpha": "art/ng-m-01060/layer6-alpha.png",
+          "depth": "art/ng-m-01060/layer6-depth.png"
+        }
+      ]
     },
     {
       "id": "NG.M.02582",
@@ -123,8 +218,43 @@
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
       "protected": false,
-      "background": "art/ng-m-02582/background.jpg",
-      "layers": "art/ng-m-02582/layers.png"
+      "layers": [
+        {
+          "color": "art/ng-m-02582/layer0.jpg",
+          "alpha": "art/ng-m-02582/layer0-alpha.png",
+          "depth": "art/ng-m-02582/layer0-depth.png"
+        },
+        {
+          "color": "art/ng-m-02582/layer1.jpg",
+          "alpha": "art/ng-m-02582/layer1-alpha.png",
+          "depth": "art/ng-m-02582/layer1-depth.png"
+        },
+        {
+          "color": "art/ng-m-02582/layer2.jpg",
+          "alpha": "art/ng-m-02582/layer2-alpha.png",
+          "depth": "art/ng-m-02582/layer2-depth.png"
+        },
+        {
+          "color": "art/ng-m-02582/layer3.jpg",
+          "alpha": "art/ng-m-02582/layer3-alpha.png",
+          "depth": "art/ng-m-02582/layer3-depth.png"
+        },
+        {
+          "color": "art/ng-m-02582/layer4.jpg",
+          "alpha": "art/ng-m-02582/layer4-alpha.png",
+          "depth": "art/ng-m-02582/layer4-depth.png"
+        },
+        {
+          "color": "art/ng-m-02582/layer5.jpg",
+          "alpha": "art/ng-m-02582/layer5-alpha.png",
+          "depth": "art/ng-m-02582/layer5-depth.png"
+        },
+        {
+          "color": "art/ng-m-02582/layer6.jpg",
+          "alpha": "art/ng-m-02582/layer6-alpha.png",
+          "depth": "art/ng-m-02582/layer6-depth.png"
+        }
+      ]
     },
     {
       "id": "NG.M.00320",
@@ -153,8 +283,33 @@
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
       "protected": false,
-      "background": "art/ng-m-00320/background.jpg",
-      "layers": "art/ng-m-00320/layers.png"
+      "layers": [
+        {
+          "color": "art/ng-m-00320/layer0.jpg",
+          "alpha": "art/ng-m-00320/layer0-alpha.png",
+          "depth": "art/ng-m-00320/layer0-depth.png"
+        },
+        {
+          "color": "art/ng-m-00320/layer1.jpg",
+          "alpha": "art/ng-m-00320/layer1-alpha.png",
+          "depth": "art/ng-m-00320/layer1-depth.png"
+        },
+        {
+          "color": "art/ng-m-00320/layer2.jpg",
+          "alpha": "art/ng-m-00320/layer2-alpha.png",
+          "depth": "art/ng-m-00320/layer2-depth.png"
+        },
+        {
+          "color": "art/ng-m-00320/layer3.jpg",
+          "alpha": "art/ng-m-00320/layer3-alpha.png",
+          "depth": "art/ng-m-00320/layer3-depth.png"
+        },
+        {
+          "color": "art/ng-m-00320/layer4.jpg",
+          "alpha": "art/ng-m-00320/layer4-alpha.png",
+          "depth": "art/ng-m-00320/layer4-depth.png"
+        }
+      ]
     },
     {
       "id": "NMK.2008.4921",
@@ -183,8 +338,38 @@
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
       "protected": false,
-      "background": "art/nmk-2008-4921/background.jpg",
-      "layers": "art/nmk-2008-4921/layers.png"
+      "layers": [
+        {
+          "color": "art/nmk-2008-4921/layer0.jpg",
+          "alpha": "art/nmk-2008-4921/layer0-alpha.png",
+          "depth": "art/nmk-2008-4921/layer0-depth.png"
+        },
+        {
+          "color": "art/nmk-2008-4921/layer1.jpg",
+          "alpha": "art/nmk-2008-4921/layer1-alpha.png",
+          "depth": "art/nmk-2008-4921/layer1-depth.png"
+        },
+        {
+          "color": "art/nmk-2008-4921/layer2.jpg",
+          "alpha": "art/nmk-2008-4921/layer2-alpha.png",
+          "depth": "art/nmk-2008-4921/layer2-depth.png"
+        },
+        {
+          "color": "art/nmk-2008-4921/layer3.jpg",
+          "alpha": "art/nmk-2008-4921/layer3-alpha.png",
+          "depth": "art/nmk-2008-4921/layer3-depth.png"
+        },
+        {
+          "color": "art/nmk-2008-4921/layer4.jpg",
+          "alpha": "art/nmk-2008-4921/layer4-alpha.png",
+          "depth": "art/nmk-2008-4921/layer4-depth.png"
+        },
+        {
+          "color": "art/nmk-2008-4921/layer5.jpg",
+          "alpha": "art/nmk-2008-4921/layer5-alpha.png",
+          "depth": "art/nmk-2008-4921/layer5-depth.png"
+        }
+      ]
     },
     {
       "id": "munch-foto-friluftsatelier-1933",
@@ -212,8 +397,38 @@
       "focus": 0.6,
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
-      "background": "art/munch-foto-friluftsatelier-1933/background.jpg",
-      "layers": "art/munch-foto-friluftsatelier-1933/layers.png"
+      "layers": [
+        {
+          "color": "art/munch-foto-friluftsatelier-1933/layer0.jpg",
+          "alpha": "art/munch-foto-friluftsatelier-1933/layer0-alpha.png",
+          "depth": "art/munch-foto-friluftsatelier-1933/layer0-depth.png"
+        },
+        {
+          "color": "art/munch-foto-friluftsatelier-1933/layer1.jpg",
+          "alpha": "art/munch-foto-friluftsatelier-1933/layer1-alpha.png",
+          "depth": "art/munch-foto-friluftsatelier-1933/layer1-depth.png"
+        },
+        {
+          "color": "art/munch-foto-friluftsatelier-1933/layer2.jpg",
+          "alpha": "art/munch-foto-friluftsatelier-1933/layer2-alpha.png",
+          "depth": "art/munch-foto-friluftsatelier-1933/layer2-depth.png"
+        },
+        {
+          "color": "art/munch-foto-friluftsatelier-1933/layer3.jpg",
+          "alpha": "art/munch-foto-friluftsatelier-1933/layer3-alpha.png",
+          "depth": "art/munch-foto-friluftsatelier-1933/layer3-depth.png"
+        },
+        {
+          "color": "art/munch-foto-friluftsatelier-1933/layer4.jpg",
+          "alpha": "art/munch-foto-friluftsatelier-1933/layer4-alpha.png",
+          "depth": "art/munch-foto-friluftsatelier-1933/layer4-depth.png"
+        },
+        {
+          "color": "art/munch-foto-friluftsatelier-1933/layer5.jpg",
+          "alpha": "art/munch-foto-friluftsatelier-1933/layer5-alpha.png",
+          "depth": "art/munch-foto-friluftsatelier-1933/layer5-depth.png"
+        }
+      ]
     },
     {
       "id": "NG.M.00357",
@@ -243,8 +458,43 @@
       "license": "CC BY 4.0",
       "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/136351.tif/full/1500,/0/default.jpg",
       "protected": false,
-      "background": "art/ng-m-00357/background.jpg",
-      "layers": "art/ng-m-00357/layers.png"
+      "layers": [
+        {
+          "color": "art/ng-m-00357/layer0.jpg",
+          "alpha": "art/ng-m-00357/layer0-alpha.png",
+          "depth": "art/ng-m-00357/layer0-depth.png"
+        },
+        {
+          "color": "art/ng-m-00357/layer1.jpg",
+          "alpha": "art/ng-m-00357/layer1-alpha.png",
+          "depth": "art/ng-m-00357/layer1-depth.png"
+        },
+        {
+          "color": "art/ng-m-00357/layer2.jpg",
+          "alpha": "art/ng-m-00357/layer2-alpha.png",
+          "depth": "art/ng-m-00357/layer2-depth.png"
+        },
+        {
+          "color": "art/ng-m-00357/layer3.jpg",
+          "alpha": "art/ng-m-00357/layer3-alpha.png",
+          "depth": "art/ng-m-00357/layer3-depth.png"
+        },
+        {
+          "color": "art/ng-m-00357/layer4.jpg",
+          "alpha": "art/ng-m-00357/layer4-alpha.png",
+          "depth": "art/ng-m-00357/layer4-depth.png"
+        },
+        {
+          "color": "art/ng-m-00357/layer5.jpg",
+          "alpha": "art/ng-m-00357/layer5-alpha.png",
+          "depth": "art/ng-m-00357/layer5-depth.png"
+        },
+        {
+          "color": "art/ng-m-00357/layer6.jpg",
+          "alpha": "art/ng-m-00357/layer6-alpha.png",
+          "depth": "art/ng-m-00357/layer6-depth.png"
+        }
+      ]
     },
     {
       "id": "NMK.2007.6345",
@@ -273,8 +523,43 @@
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
       "protected": false,
-      "background": "art/nmk-2007-6345/background.jpg",
-      "layers": "art/nmk-2007-6345/layers.png"
+      "layers": [
+        {
+          "color": "art/nmk-2007-6345/layer0.jpg",
+          "alpha": "art/nmk-2007-6345/layer0-alpha.png",
+          "depth": "art/nmk-2007-6345/layer0-depth.png"
+        },
+        {
+          "color": "art/nmk-2007-6345/layer1.jpg",
+          "alpha": "art/nmk-2007-6345/layer1-alpha.png",
+          "depth": "art/nmk-2007-6345/layer1-depth.png"
+        },
+        {
+          "color": "art/nmk-2007-6345/layer2.jpg",
+          "alpha": "art/nmk-2007-6345/layer2-alpha.png",
+          "depth": "art/nmk-2007-6345/layer2-depth.png"
+        },
+        {
+          "color": "art/nmk-2007-6345/layer3.jpg",
+          "alpha": "art/nmk-2007-6345/layer3-alpha.png",
+          "depth": "art/nmk-2007-6345/layer3-depth.png"
+        },
+        {
+          "color": "art/nmk-2007-6345/layer4.jpg",
+          "alpha": "art/nmk-2007-6345/layer4-alpha.png",
+          "depth": "art/nmk-2007-6345/layer4-depth.png"
+        },
+        {
+          "color": "art/nmk-2007-6345/layer5.jpg",
+          "alpha": "art/nmk-2007-6345/layer5-alpha.png",
+          "depth": "art/nmk-2007-6345/layer5-depth.png"
+        },
+        {
+          "color": "art/nmk-2007-6345/layer6.jpg",
+          "alpha": "art/nmk-2007-6345/layer6-alpha.png",
+          "depth": "art/nmk-2007-6345/layer6-depth.png"
+        }
+      ]
     },
     {
       "id": "NG.M.01725",
@@ -303,8 +588,43 @@
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
       "protected": false,
-      "background": "art/ng-m-01725/background.jpg",
-      "layers": "art/ng-m-01725/layers.png"
+      "layers": [
+        {
+          "color": "art/ng-m-01725/layer0.jpg",
+          "alpha": "art/ng-m-01725/layer0-alpha.png",
+          "depth": "art/ng-m-01725/layer0-depth.png"
+        },
+        {
+          "color": "art/ng-m-01725/layer1.jpg",
+          "alpha": "art/ng-m-01725/layer1-alpha.png",
+          "depth": "art/ng-m-01725/layer1-depth.png"
+        },
+        {
+          "color": "art/ng-m-01725/layer2.jpg",
+          "alpha": "art/ng-m-01725/layer2-alpha.png",
+          "depth": "art/ng-m-01725/layer2-depth.png"
+        },
+        {
+          "color": "art/ng-m-01725/layer3.jpg",
+          "alpha": "art/ng-m-01725/layer3-alpha.png",
+          "depth": "art/ng-m-01725/layer3-depth.png"
+        },
+        {
+          "color": "art/ng-m-01725/layer4.jpg",
+          "alpha": "art/ng-m-01725/layer4-alpha.png",
+          "depth": "art/ng-m-01725/layer4-depth.png"
+        },
+        {
+          "color": "art/ng-m-01725/layer5.jpg",
+          "alpha": "art/ng-m-01725/layer5-alpha.png",
+          "depth": "art/ng-m-01725/layer5-depth.png"
+        },
+        {
+          "color": "art/ng-m-01725/layer6.jpg",
+          "alpha": "art/ng-m-01725/layer6-alpha.png",
+          "depth": "art/ng-m-01725/layer6-depth.png"
+        }
+      ]
     },
     {
       "id": "NG.M.01632",
@@ -334,8 +654,43 @@
       "license": "CC BY 4.0",
       "imageUrl": "https://ms01.nasjonalmuseet.no/iip/?iiif=/tif/37842.tif/full/1500,/0/default.jpg",
       "protected": false,
-      "background": "art/ng-m-01632/background.jpg",
-      "layers": "art/ng-m-01632/layers.png"
+      "layers": [
+        {
+          "color": "art/ng-m-01632/layer0.jpg",
+          "alpha": "art/ng-m-01632/layer0-alpha.png",
+          "depth": "art/ng-m-01632/layer0-depth.png"
+        },
+        {
+          "color": "art/ng-m-01632/layer1.jpg",
+          "alpha": "art/ng-m-01632/layer1-alpha.png",
+          "depth": "art/ng-m-01632/layer1-depth.png"
+        },
+        {
+          "color": "art/ng-m-01632/layer2.jpg",
+          "alpha": "art/ng-m-01632/layer2-alpha.png",
+          "depth": "art/ng-m-01632/layer2-depth.png"
+        },
+        {
+          "color": "art/ng-m-01632/layer3.jpg",
+          "alpha": "art/ng-m-01632/layer3-alpha.png",
+          "depth": "art/ng-m-01632/layer3-depth.png"
+        },
+        {
+          "color": "art/ng-m-01632/layer4.jpg",
+          "alpha": "art/ng-m-01632/layer4-alpha.png",
+          "depth": "art/ng-m-01632/layer4-depth.png"
+        },
+        {
+          "color": "art/ng-m-01632/layer5.jpg",
+          "alpha": "art/ng-m-01632/layer5-alpha.png",
+          "depth": "art/ng-m-01632/layer5-depth.png"
+        },
+        {
+          "color": "art/ng-m-01632/layer6.jpg",
+          "alpha": "art/ng-m-01632/layer6-alpha.png",
+          "depth": "art/ng-m-01632/layer6-depth.png"
+        }
+      ]
     },
     {
       "id": "NG.M.03609",
@@ -364,8 +719,38 @@
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
       "protected": false,
-      "background": "art/ng-m-03609/background.jpg",
-      "layers": "art/ng-m-03609/layers.png"
+      "layers": [
+        {
+          "color": "art/ng-m-03609/layer0.jpg",
+          "alpha": "art/ng-m-03609/layer0-alpha.png",
+          "depth": "art/ng-m-03609/layer0-depth.png"
+        },
+        {
+          "color": "art/ng-m-03609/layer1.jpg",
+          "alpha": "art/ng-m-03609/layer1-alpha.png",
+          "depth": "art/ng-m-03609/layer1-depth.png"
+        },
+        {
+          "color": "art/ng-m-03609/layer2.jpg",
+          "alpha": "art/ng-m-03609/layer2-alpha.png",
+          "depth": "art/ng-m-03609/layer2-depth.png"
+        },
+        {
+          "color": "art/ng-m-03609/layer3.jpg",
+          "alpha": "art/ng-m-03609/layer3-alpha.png",
+          "depth": "art/ng-m-03609/layer3-depth.png"
+        },
+        {
+          "color": "art/ng-m-03609/layer4.jpg",
+          "alpha": "art/ng-m-03609/layer4-alpha.png",
+          "depth": "art/ng-m-03609/layer4-depth.png"
+        },
+        {
+          "color": "art/ng-m-03609/layer5.jpg",
+          "alpha": "art/ng-m-03609/layer5-alpha.png",
+          "depth": "art/ng-m-03609/layer5-depth.png"
+        }
+      ]
     },
     {
       "id": "NG.M.00943",
@@ -394,8 +779,28 @@
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
       "protected": false,
-      "background": "art/ng-m-00943/background.jpg",
-      "layers": "art/ng-m-00943/layers.png"
+      "layers": [
+        {
+          "color": "art/ng-m-00943/layer0.jpg",
+          "alpha": "art/ng-m-00943/layer0-alpha.png",
+          "depth": "art/ng-m-00943/layer0-depth.png"
+        },
+        {
+          "color": "art/ng-m-00943/layer1.jpg",
+          "alpha": "art/ng-m-00943/layer1-alpha.png",
+          "depth": "art/ng-m-00943/layer1-depth.png"
+        },
+        {
+          "color": "art/ng-m-00943/layer2.jpg",
+          "alpha": "art/ng-m-00943/layer2-alpha.png",
+          "depth": "art/ng-m-00943/layer2-depth.png"
+        },
+        {
+          "color": "art/ng-m-00943/layer3.jpg",
+          "alpha": "art/ng-m-00943/layer3-alpha.png",
+          "depth": "art/ng-m-00943/layer3-depth.png"
+        }
+      ]
     },
     {
       "id": "NG.M.00939",
@@ -424,8 +829,28 @@
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
       "protected": false,
-      "background": "art/ng-m-00939/background.jpg",
-      "layers": "art/ng-m-00939/layers.png"
+      "layers": [
+        {
+          "color": "art/ng-m-00939/layer0.jpg",
+          "alpha": "art/ng-m-00939/layer0-alpha.png",
+          "depth": "art/ng-m-00939/layer0-depth.png"
+        },
+        {
+          "color": "art/ng-m-00939/layer1.jpg",
+          "alpha": "art/ng-m-00939/layer1-alpha.png",
+          "depth": "art/ng-m-00939/layer1-depth.png"
+        },
+        {
+          "color": "art/ng-m-00939/layer2.jpg",
+          "alpha": "art/ng-m-00939/layer2-alpha.png",
+          "depth": "art/ng-m-00939/layer2-depth.png"
+        },
+        {
+          "color": "art/ng-m-00939/layer3.jpg",
+          "alpha": "art/ng-m-00939/layer3-alpha.png",
+          "depth": "art/ng-m-00939/layer3-depth.png"
+        }
+      ]
     },
     {
       "id": "MS-00444-1988",
@@ -454,8 +879,43 @@
       "focus": 0.5,
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
-      "background": "art/ms-00444-1988/background.jpg",
-      "layers": "art/ms-00444-1988/layers.png"
+      "layers": [
+        {
+          "color": "art/ms-00444-1988/layer0.jpg",
+          "alpha": "art/ms-00444-1988/layer0-alpha.png",
+          "depth": "art/ms-00444-1988/layer0-depth.png"
+        },
+        {
+          "color": "art/ms-00444-1988/layer1.jpg",
+          "alpha": "art/ms-00444-1988/layer1-alpha.png",
+          "depth": "art/ms-00444-1988/layer1-depth.png"
+        },
+        {
+          "color": "art/ms-00444-1988/layer2.jpg",
+          "alpha": "art/ms-00444-1988/layer2-alpha.png",
+          "depth": "art/ms-00444-1988/layer2-depth.png"
+        },
+        {
+          "color": "art/ms-00444-1988/layer3.jpg",
+          "alpha": "art/ms-00444-1988/layer3-alpha.png",
+          "depth": "art/ms-00444-1988/layer3-depth.png"
+        },
+        {
+          "color": "art/ms-00444-1988/layer4.jpg",
+          "alpha": "art/ms-00444-1988/layer4-alpha.png",
+          "depth": "art/ms-00444-1988/layer4-depth.png"
+        },
+        {
+          "color": "art/ms-00444-1988/layer5.jpg",
+          "alpha": "art/ms-00444-1988/layer5-alpha.png",
+          "depth": "art/ms-00444-1988/layer5-depth.png"
+        },
+        {
+          "color": "art/ms-00444-1988/layer6.jpg",
+          "alpha": "art/ms-00444-1988/layer6-alpha.png",
+          "depth": "art/ms-00444-1988/layer6-depth.png"
+        }
+      ]
     },
     {
       "id": "MS-00063-1988",
@@ -484,8 +944,28 @@
       "focus": 0.5,
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
-      "background": "art/ms-00063-1988/background.jpg",
-      "layers": "art/ms-00063-1988/layers.png"
+      "layers": [
+        {
+          "color": "art/ms-00063-1988/layer0.jpg",
+          "alpha": "art/ms-00063-1988/layer0-alpha.png",
+          "depth": "art/ms-00063-1988/layer0-depth.png"
+        },
+        {
+          "color": "art/ms-00063-1988/layer1.jpg",
+          "alpha": "art/ms-00063-1988/layer1-alpha.png",
+          "depth": "art/ms-00063-1988/layer1-depth.png"
+        },
+        {
+          "color": "art/ms-00063-1988/layer2.jpg",
+          "alpha": "art/ms-00063-1988/layer2-alpha.png",
+          "depth": "art/ms-00063-1988/layer2-depth.png"
+        },
+        {
+          "color": "art/ms-00063-1988/layer3.jpg",
+          "alpha": "art/ms-00063-1988/layer3-alpha.png",
+          "depth": "art/ms-00063-1988/layer3-depth.png"
+        }
+      ]
     },
     {
       "id": "NMK.2006.0117",
@@ -518,8 +998,18 @@
       "focus": 0.5,
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
-      "background": "art/nmk-2006-0117/background.jpg",
-      "layers": "art/nmk-2006-0117/layers.png"
+      "layers": [
+        {
+          "color": "art/nmk-2006-0117/layer0.jpg",
+          "alpha": "art/nmk-2006-0117/layer0-alpha.png",
+          "depth": "art/nmk-2006-0117/layer0-depth.png"
+        },
+        {
+          "color": "art/nmk-2006-0117/layer1.jpg",
+          "alpha": "art/nmk-2006-0117/layer1-alpha.png",
+          "depth": "art/nmk-2006-0117/layer1-depth.png"
+        }
+      ]
     },
     {
       "id": "NG.M.00302-011",
@@ -548,8 +1038,43 @@
       "focus": 0.5,
       "strength": 1.0,
       "depthModel": "DA3MONO-LARGE",
-      "background": "art/ng-m-00302-011/background.jpg",
-      "layers": "art/ng-m-00302-011/layers.png"
+      "layers": [
+        {
+          "color": "art/ng-m-00302-011/layer0.jpg",
+          "alpha": "art/ng-m-00302-011/layer0-alpha.png",
+          "depth": "art/ng-m-00302-011/layer0-depth.png"
+        },
+        {
+          "color": "art/ng-m-00302-011/layer1.jpg",
+          "alpha": "art/ng-m-00302-011/layer1-alpha.png",
+          "depth": "art/ng-m-00302-011/layer1-depth.png"
+        },
+        {
+          "color": "art/ng-m-00302-011/layer2.jpg",
+          "alpha": "art/ng-m-00302-011/layer2-alpha.png",
+          "depth": "art/ng-m-00302-011/layer2-depth.png"
+        },
+        {
+          "color": "art/ng-m-00302-011/layer3.jpg",
+          "alpha": "art/ng-m-00302-011/layer3-alpha.png",
+          "depth": "art/ng-m-00302-011/layer3-depth.png"
+        },
+        {
+          "color": "art/ng-m-00302-011/layer4.jpg",
+          "alpha": "art/ng-m-00302-011/layer4-alpha.png",
+          "depth": "art/ng-m-00302-011/layer4-depth.png"
+        },
+        {
+          "color": "art/ng-m-00302-011/layer5.jpg",
+          "alpha": "art/ng-m-00302-011/layer5-alpha.png",
+          "depth": "art/ng-m-00302-011/layer5-depth.png"
+        },
+        {
+          "color": "art/ng-m-00302-011/layer6.jpg",
+          "alpha": "art/ng-m-00302-011/layer6-alpha.png",
+          "depth": "art/ng-m-00302-011/layer6-depth.png"
+        }
+      ]
     }
   ]
 }

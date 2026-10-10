@@ -1,7 +1,26 @@
-import { fullscreenVert, paintingFrag, dustVert, dustFrag } from './shaders.js';
+import { fullscreenVert, paintingFrag, layersFrag, dustVert, dustFrag } from './shaders.js';
 
 const DUST_COUNT = 700;
 const MAX_OVERSCAN = 0.12; // share cropped from each side, at most
+const MAX_LAYERS = 8;
+
+/** Lowest and highest value in a greyscale ImageBitmap, 0..1. */
+function valueRange(bitmap) {
+  const { width: w, height: h } = bitmap;
+  const canvas = typeof OffscreenCanvas === 'undefined'
+    ? Object.assign(document.createElement('canvas'), { width: w, height: h })
+    : new OffscreenCanvas(w, h);
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(bitmap, 0, 0);
+  const data = ctx.getImageData(0, 0, w, h).data;
+  let lo = 255;
+  let hi = 0;
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i] < lo) lo = data[i];
+    if (data[i] > hi) hi = data[i];
+  }
+  return [Math.max(0, lo - 1) / 255, Math.min(255, hi + 1) / 255];
+}
 
 /**
  * Draws one painting with depth-based parallax (+ optional dust) into a WebGL2 canvas.
@@ -21,33 +40,66 @@ export class ParallaxRenderer {
     this.gl = gl;
     this.programs = {
       painting: this.#program(fullscreenVert, paintingFrag),
+      layers: this.#program(fullscreenVert, layersFrag),
       dust: this.#program(dustVert, dustFrag),
     };
     this.vao = gl.createVertexArray(); // attribute-less draws
     this.aniso = gl.getExtension('EXT_texture_filter_anisotropic');
     this.image = null;
     this.depth = null;
-    this.plate = null;   // background plate and layers map (tools/layers.py), when the work has them
-    this.layers = null;
+    this.layers = null;  // depth layers (tools/layers.py): { count, colors, alphas, depths, ranges }
     this.size = [1, 1];
     this.overscan = 0;
     this.background = [0.039, 0.039, 0.043];
   }
 
-  /** Replace the textures with a new painting and its depth map (ImageBitmaps). */
-  setPainting(imageBitmap, depthBitmap, plateBitmap = null, layersBitmap = null) {
+  /**
+   * Replace the textures with a new painting and its depth map (ImageBitmaps), and its depth
+   * layers if it has them: [{ color, alpha, depth }] back to front.
+   */
+  setPainting(imageBitmap, depthBitmap, layers = null) {
     const gl = this.gl;
-    for (const tex of [this.image, this.depth, this.plate, this.layers]) if (tex) gl.deleteTexture(tex);
+    const old = [this.image, this.depth, this.layers?.colors, this.layers?.alphas, this.layers?.depths];
+    for (const tex of old) if (tex) gl.deleteTexture(tex);
     this.image = this.#texture(imageBitmap, gl.RGBA8, gl.RGBA, true);
     this.depth = this.#texture(depthBitmap, gl.R8, gl.RED, false);
-    const layered = plateBitmap && layersBitmap;
-    this.plate = layered ? this.#texture(plateBitmap, gl.RGBA8, gl.RGBA, true) : null;
-    this.layers = layered ? this.#texture(layersBitmap, gl.RG8, gl.RG, false) : null;
     this.size = [imageBitmap.width, imageBitmap.height];
+    this.layers = null;
+    if (layers?.length) {
+      const stack = layers.slice(-MAX_LAYERS);
+      this.layers = {
+        count: stack.length,
+        colors: this.#array(stack.map((l) => l.color), gl.RGBA8, gl.RGBA),
+        alphas: this.#array(stack.map((l) => l.alpha), gl.R8, gl.RED),
+        depths: this.#array(stack.map((l) => l.depth), gl.R8, gl.RED),
+        ranges: new Float32Array(MAX_LAYERS * 2),
+      };
+      stack.forEach((l, k) => this.layers.ranges.set(valueRange(l.depth), 2 * k));
+    }
   }
 
   get hasLayers() {
-    return Boolean(this.plate);
+    return Boolean(this.layers);
+  }
+
+  /** The layers' maps as one texture array (slices of another size are left empty). */
+  #array(bitmaps, internalFormat, format) {
+    const gl = this.gl;
+    const [w, h] = this.size;
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, tex);
+    gl.texStorage3D(gl.TEXTURE_2D_ARRAY, 1, internalFormat, w, h, bitmaps.length);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
+    bitmaps.forEach((b, k) => {
+      if (b.width === w && b.height === h) gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, 0, 0, 0, k, w, h, 1, format, gl.UNSIGNED_BYTE, b);
+    });
+    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    return tex;
   }
 
   /**
@@ -83,7 +135,8 @@ export class ParallaxRenderer {
    * @param {number} p.fade         0..1
    * @param {number} p.dust         0..1 dust intensity
    * @param {number} p.time         seconds
-   * @param {boolean} p.layered     use the background plate behind foreground edges, if there is one
+   * @param {boolean} p.layered     draw the depth layers, if the work has them (mode 1 only)
+   * @param {boolean} p.debug       mark what was filled in by AI (magenta), or edges that stretch (yellow)
    */
   render(p) {
     const gl = this.gl;
@@ -116,25 +169,22 @@ export class ParallaxRenderer {
     gl.disable(gl.SCISSOR_TEST);
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     gl.clearColor(...this.background, 1);
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.depthMask(true);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     if (!this.image) return;
 
     const vy = this.canvas.height - rect.y - rect.h; // GL viewports start bottom-left
     gl.viewport(rect.x, vy, rect.w, rect.h);
     gl.enable(gl.SCISSOR_TEST);
     gl.scissor(Math.max(0, rect.x), Math.max(0, vy), Math.min(rect.w, this.canvas.width), Math.min(rect.h, this.canvas.height));
-    gl.bindVertexArray(this.vao);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.image);
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, this.depth);
-    const layered = Boolean(p.layered && this.plate);
-    if (layered) {
-      gl.activeTexture(gl.TEXTURE2);
-      gl.bindTexture(gl.TEXTURE_2D, this.plate);
-      gl.activeTexture(gl.TEXTURE3);
-      gl.bindTexture(gl.TEXTURE_2D, this.layers);
-    }
+    const bindPainting = () => {
+      gl.bindVertexArray(this.vao);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, this.image);
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, this.depth);
+    };
+    const layered = Boolean(p.layered && p.mode === 1 && this.layers);
 
     const common = (prog) => {
       this.#set(prog, 'uImage', 0, 'i');
@@ -145,23 +195,47 @@ export class ParallaxRenderer {
       this.#set(prog, 'uDolly', p.dolly);
     };
 
-    const painting = this.programs.painting;
-    gl.useProgram(painting.program);
-    common(painting);
-    this.#set(painting, 'uMode', p.mode, 'i');
-    this.#set(painting, 'uSteps', steps, 'i');
-    this.#set(painting, 'uShowDepth', p.showDepth);
-    this.#set(painting, 'uFocusFlash', p.focusFlash);
-    this.#set(painting, 'uFade', p.fade);
-    this.#set(painting, 'uBackground', this.background);
-    this.#set(painting, 'uPlate', 2, 'i');
-    this.#set(painting, 'uLayers', 3, 'i');
-    this.#set(painting, 'uLayered', layered ? 1 : 0, 'i');
     gl.disable(gl.BLEND);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    if (layered) {
+      // All layers in one pass: per pixel, the first layer the view ray meets that has anything there
+      const prog = this.programs.layers;
+      bindPainting();
+      gl.useProgram(prog.program);
+      common(prog);
+      const units = [['uColors', this.layers.colors], ['uAlphas', this.layers.alphas], ['uDepths', this.layers.depths]];
+      units.forEach(([name, tex], i) => {
+        gl.activeTexture(gl.TEXTURE2 + i);
+        gl.bindTexture(gl.TEXTURE_2D_ARRAY, tex);
+        this.#set(prog, name, 2 + i, 'i');
+      });
+      this.#set(prog, 'uCount', this.layers.count, 'i');
+      this.#set(prog, 'uRange', this.layers.ranges, 'v2');
+      this.#set(prog, 'uTravel', travel);
+      this.#set(prog, 'uRectPx', [rect.w, rect.h]);
+      this.#set(prog, 'uShowDepth', p.showDepth);
+      this.#set(prog, 'uFocusFlash', p.focusFlash);
+      this.#set(prog, 'uFade', p.fade);
+      this.#set(prog, 'uBackground', this.background);
+      this.#set(prog, 'uDebug', p.debug ? 1 : 0, 'i');
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    } else {
+      const painting = this.programs.painting;
+      bindPainting();
+      gl.useProgram(painting.program);
+      common(painting);
+      this.#set(painting, 'uMode', p.mode, 'i');
+      this.#set(painting, 'uSteps', steps, 'i');
+      this.#set(painting, 'uShowDepth', p.showDepth);
+      this.#set(painting, 'uFocusFlash', p.focusFlash);
+      this.#set(painting, 'uFade', p.fade);
+      this.#set(painting, 'uBackground', this.background);
+      this.#set(painting, 'uDebug', p.debug ? 1 : 0, 'i');
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
 
     if (p.dust > 0.001) {
       const dust = this.programs.dust;
+      bindPainting();
       gl.useProgram(dust.program);
       common(dust);
       this.#set(dust, 'uTime', p.time);
@@ -172,7 +246,7 @@ export class ParallaxRenderer {
       gl.drawArrays(gl.POINTS, 0, DUST_COUNT);
     }
 
-    return { steps, overscan: this.overscan };
+    return { steps: layered ? `${this.layers.count} lag` : steps, overscan: this.overscan };
   }
 
   #texture(source, internalFormat, format, mipmaps) {
@@ -222,6 +296,7 @@ export class ParallaxRenderer {
     }
     if (loc === null) return;
     if (type === 'i') gl.uniform1i(loc, value);
+    else if (type === 'v2') gl.uniform2fv(loc, value);
     else if (typeof value === 'number') gl.uniform1f(loc, value);
     else if (value.length === 2) gl.uniform2fv(loc, value);
     else if (value.length === 3) gl.uniform3fv(loc, value);

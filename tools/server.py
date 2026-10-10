@@ -102,16 +102,16 @@ def add_work(object_id: str, emit) -> None:
         emit({"step": "depth", "message": "Lager dybdekart med Depth Anything 3 …"})
         t0 = time.time()
         image = Image.open(md.WEB_DIR / work["image"]).convert("RGB")
-        depth = md.depth_map(models["depth"], image, DEPTH_ARGS)
+        depth, near = md.depth_map(models["depth"], image, DEPTH_ARGS)
         depth.save(md.WEB_DIR / work["depth"], optimize=True)
         work["depthModel"] = DEPTH_ARGS.model.split("/")[-1]
 
-        emit({"step": "layers", "message": "Fyller inn bakgrunnen bak forgrunnen med LaMa …"})
-        md.save_layers(models["lama"], work, image, depth, models["device"])
+        emit({"step": "layers", "message": "Deler i dybdelag og fyller inn bakgrunnen med LaMa …"})
+        md.save_layers(models["lama"], work, image, near, models["device"])
 
         fa.write_manifest([*fa.read_manifest(), work])
         fa.add_to_artworks(entry)
-        print(f"  ✓ {work['title']} – {work['artist']} ({time.time() - t0:.1f}s dybde og plate)")
+        print(f"  ✓ {work['title']} – {work['artist']} ({time.time() - t0:.1f}s dybde og lag)")
         emit({"done": work})
 
 

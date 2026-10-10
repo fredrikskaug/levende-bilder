@@ -5,13 +5,13 @@ som er laget for relativ dybde fra ett enkelt bilde. Hovedserien (DA3-LARGE o.l.
 laget for geometri fra flere bilder, og ser et maleri som en flat flate.
 
 Resultatet lagres som en 8-bits gråtone-PNG ved siden av bildet. Hvit betyr nær
-og svart betyr langt unna. I tillegg lages en bakgrunnsplate (background.jpg) og et lagkart
-(layers.png) med LaMa, slik at man ser bakgrunn og ikke strukne piksler bak nære ting når
-perspektivet flytter seg (se layers.py).
+og svart betyr langt unna. I tillegg deles bildet i dybdelag med LaMa-utfylt bakgrunn
+(layer<k>.jpg, -alpha.png, -depth.png), slik at man ser bakgrunn og ikke strukne piksler bak
+nære ting når perspektivet flytter seg (se layers.py).
 
     python tools/make_depth.py                         # alle verk
     python tools/make_depth.py --only NG.M.00939       # bare ett
-    python tools/make_depth.py --only-layers           # bare bakgrunnsplatene, fra dybdekartene som finnes
+    python tools/make_depth.py --only-layers           # bare lagene, depth.png blir stående
     python tools/make_depth.py --mapping disparity --res 756
 """
 
@@ -148,8 +148,11 @@ def estimate(model, rgb: np.ndarray, args) -> np.ndarray:
     return normalise(to_nearness(depth, args.mapping))
 
 
-def depth_map(model, image: Image.Image, args) -> Image.Image:
-    """The full pipeline for one image: estimate (+ mirrored pass), post-process, 8-bit PNG-ready."""
+def depth_map(model, image: Image.Image, args) -> tuple[Image.Image, np.ndarray]:
+    """The full pipeline for one image: estimate (+ mirrored pass), post-process.
+
+    Returns the 8-bit depth map for the single-layer viewer (foreground grown a little) and the
+    nearness at image size without that growth, for the depth layers (layers.py)."""
     rgb = np.asarray(image.convert("RGB"))
     near = estimate(model, rgb, args)
     if args.tta:
@@ -157,7 +160,8 @@ def depth_map(model, image: Image.Image, args) -> Image.Image:
         flipped = estimate(model, np.ascontiguousarray(rgb[:, ::-1]), args)
         near = normalise(0.5 * (near + flipped[:, ::-1]), 0, 100)
     out = postprocess(near, image.size, args.dilate, args.blur)
-    return Image.fromarray(np.round(out * 255).astype(np.uint8))
+    plain = postprocess(near, image.size, 0, 0.8)
+    return Image.fromarray(np.round(out * 255).astype(np.uint8)), plain
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -173,24 +177,34 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dilate", type=int, default=3, help="piksler forgrunnen vokses med")
     parser.add_argument("--blur", type=float, default=1.2, help="gaussisk uskarphet (sigma, piksler)")
     parser.add_argument("--layers", action=argparse.BooleanOptionalAction, default=True,
-                        help="bakgrunnsplate med LaMa bak forgrunnskantene")
-    parser.add_argument("--only-layers", action="store_true", help="ikke lag dybdekartene på nytt, bare platene")
+                        help="dybdelag med KI-utfylt bakgrunn (layers.py)")
+    parser.add_argument("--only-layers", action="store_true", help="ikke skriv depth.png på nytt, bare lagene")
     parser.add_argument("--only", nargs="*", help="bare disse objekt-ID-ene")
     return parser
 
 
-def save_layers(lama, work: dict, image: Image.Image, depth: Image.Image, device: torch.device) -> float:
-    """Background plate and layers map next to the image; returns the share that was filled in."""
+def save_layers(lama, work: dict, image: Image.Image, near: np.ndarray, device: torch.device) -> dict:
+    """Depth layers next to the image (layer<k>.jpg, -alpha.png, -depth.png, back to front)."""
     import layers
 
-    plate, layer_map, share = layers.make_layers(lama, image, depth, device)
+    stack, info = layers.make_layers(lama, image, near, device)
     folder = (WEB_DIR / work["image"]).parent
-    plate.save(folder / "background.jpg", quality=90, optimize=True)
-    layer_map.save(folder / "layers.png", optimize=True)
     base = work["image"].rsplit("/", 1)[0]
-    work["background"] = f"{base}/background.jpg"
-    work["layers"] = f"{base}/layers.png"
-    return share
+    for old in [*folder.glob("layer*"), folder / "background.jpg", folder / "behind.png", folder / "edges.png"]:
+        old.unlink(missing_ok=True)  # also from earlier versions
+    work["layers"] = []
+    for k, layer in enumerate(stack):
+        layer["color"].save(folder / f"layer{k}.jpg", quality=88, optimize=True)
+        layer["alpha"].save(folder / f"layer{k}-alpha.png", optimize=True)
+        layer["depth"].save(folder / f"layer{k}-depth.png", optimize=True)
+        work["layers"].append({
+            "color": f"{base}/layer{k}.jpg",
+            "alpha": f"{base}/layer{k}-alpha.png",
+            "depth": f"{base}/layer{k}-depth.png",
+        })
+    for key in ("background", "behind", "edges"):
+        work.pop(key, None)
+    return info
 
 
 def main() -> None:
@@ -201,11 +215,9 @@ def main() -> None:
     works = [w for w in manifest["works"] if not args.only or w["id"] in args.only]
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = None
-    if not args.only_layers:
-        print(f"Laster {args.model} på {device} …")
-        keep_raw_sky()
-        model = load_model(args.model, device)
+    print(f"Laster {args.model} på {device} …")
+    keep_raw_sky()
+    model = load_model(args.model, device)  # the layers need the depth before it's grown, so always
     lama = None
     if args.layers or args.only_layers:
         import layers
@@ -215,14 +227,16 @@ def main() -> None:
     for work in works:
         t0 = time.time()
         image = Image.open(WEB_DIR / work["image"]).convert("RGB")
-        if model:
-            depth_map(model, image, args).save(WEB_DIR / work["depth"], optimize=True)
+        depth, near = depth_map(model, image, args)
+        if not args.only_layers:
+            depth.save(WEB_DIR / work["depth"], optimize=True)
             work["depthModel"] = args.model.split("/")[-1]
             work.pop("depthRatio", None)  # from an earlier version
         note = ""
         if lama:
-            share = save_layers(lama, work, image, Image.open(WEB_DIR / work["depth"]), device)
-            note = f"  plate {share * 100:4.1f} %"
+            info = save_layers(lama, work, image, near, device)
+            note = "  lag " + " · ".join(f"{own}%+{filled}%" for own, filled in info["layers"])
+            note += f"  (grenser {', '.join(f'{c:.2f}' for c in info['cuts'])})"
         print(f"  ✓ {work['title']:<32} {image.size[0]}×{image.size[1]}{note}  {time.time() - t0:.1f}s")
 
     MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8", newline="\n")

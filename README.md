@@ -85,7 +85,7 @@ sertifikatadvarselen.
 ```powershell
 .\tools\setup.ps1                      # Python 3.12-venv med CUDA-torch og Depth Anything 3 (-Cpu for bare CPU)
 .\.venv\Scripts\python tools\fetch_artworks.py   # henter bilder (1500 px) og metadata via IIIF
-.\.venv\Scripts\python tools\make_depth.py       # lager depth.png og bakgrunnsplaten (LaMa)
+.\.venv\Scripts\python tools\make_depth.py       # lager depth.png og dybdelagene (LaMa)
 ```
 
 1. Legg til objekt-ID-en (for eksempel `NG.M.00844` eller `NMK.2007.6426`) i
@@ -99,9 +99,9 @@ sertifikatadvarselen.
    `artworks.json`.
 3. `make_depth.py` kjører `DA3MONO-LARGE`, tar snittet av originalen og et speilvendt bilde,
    presser himmelen bakover, vokser forgrunnen litt og lagrer en 8-bits PNG.
-   Deretter lager den en bakgrunnsplate med LaMa (se «Utfylt bakgrunn» under).
-   Det tar rundt 2–4 sekunder per maleri på en RTX 4050. `--only-layers` lager bare platene
-   fra dybdekartene som finnes, og `--no-layers` hopper over dem.
+   Deretter lager den dybdelagene med LaMa (se «Dybdelag» under).
+   Det tar rundt 15–30 sekunder per maleri på en RTX 4050. `--only-layers` lager bare lagene
+   på nytt (`depth.png` blir stående), og `--no-layers` hopper over dem.
 
 `focus` og `strength` per verk i `artworks.json` gir startverdiene for fokusplan og styrke.
 
@@ -116,25 +116,45 @@ sertifikatadvarselen.
   «Okklusjon» følger synslinjen gjennom dybdekartet fra forgrunnen og bakover
   (parallax occlusion mapping), slik at forgrunnen dekker bakgrunnen riktig.
   Antall steg tilpasses hvor langt bildet faktisk flyttes.
-- **Utfylt bakgrunn** (`L`, `tools/layers.py`): Med ett dybdekart finnes det ingenting bak et
-  hode foran sjøen, så når perspektivet flytter seg, ble kantpikslene strukket ut i striper.
-  Nå deles bildet i to lag, som i [3D Photo Inpainting](https://arxiv.org/abs/2004.04727) og
+- **Dybdelag** (`L`, `tools/layers.py`): Med ett dybdekart finnes det ingenting bak en båt
+  foran sjøen, så når perspektivet flytter seg, blir kanten strukket ut i striper. Derfor deles
+  maleriet i lag der dybden hopper, omtrent som i
+  [3D Photo Inpainting](https://arxiv.org/abs/2004.04727) og
   [SLIDE](https://arxiv.org/abs/2109.01068):
-  - Der dybden faller brått, er det en forgrunnskant. Et bånd innenfor kanten kan bli
-    avdekket; bredden er maks forskyvning (5 % av bildebredden) ganger dybdehoppet.
-  - [LaMa](https://github.com/advimman/lama) (Apache 2.0) fyller inn bakgrunnen i båndet. Den får et
-    større hull enn båndet (smale figurer forsvinner helt), så den bare ser bakgrunnen og ikke
-    maler figuren inn igjen. Bakgrunnsdybden fortsetter fra foten av kanten.
-  - Skyggeleggeren marsjerer begge lagene: en synslinje som kommer inn under forgrunnskanten fra
-    siden, går under den og treffer platen i stedet for å strekke kanten.
-  - `background.jpg` er platen (ensfarget utenfor båndene, så den blir liten), og `layers.png`
-    har dybden bak (R) og båndet (G).
+  - Grensene finnes for hvert bilde, midt i de dybdehoppene som skiller mest (opptil 7 lag). Et
+    landskap med mange plan får flere lag enn et portrett.
+  - Dybdekartets kanter er myke og ligger litt ved siden av de ekte kantene. Bratte trinn gjøres
+    skarpe, og grensene flyttes noen få piksler over på fargekanten i maleriet (guided filter),
+    ikke mer, så mørkt hår mot mørke trær ikke blir skåret av. Små øyer, som et
+    hode litt lenger bak enn kroppen, går til det tilstøtende laget som ligger nærmest i dybde.
+    Slake skråninger, som en fjellside, blir ikke delt.
+  - Hvert lag har sine egne piksler, det som er skjult bak nærmere lag og ingenting ellers, og én
+    jevn dybdeflate som fortsetter forbi kanten. [LaMa](https://github.com/advimman/lama)
+    (Apache 2.0) fyller inn det skjulte, men bare båndet som kan bli synlig (og en margin), og ser
+    resten av maleriet som kontekst, også det som er nærmere lenger unna: skogen rundt en kirke,
+    fjellsiden bak en jeger. Ett stort hull får den til å finne på ting. Den ser helt inntil det som
+    er fjernet, så utfyllingen møter maleriet uten søm. Der hullet er smalt og spisst (et
+    kirkespir, et gevær), går det noen piksler ut i bakgrunnen, så det blir rundt: får LaMa et hull
+    formet som et spir, maler den et tre i det.
+  - Et lite stykke av noe som fortsetter uten trinn inn i et annet lag (toppen av et hode litt
+    nærmere enn ansiktet), blir med i det laget, så hodet ikke deles i to.
+  - Skyggeleggeren (`layersFrag`) følger synslinjen for hver piksel på skjermen gjennom lagene
+    forfra og bakover: hvor den treffer lagets flate, og om laget har noe der. Det første som har
+    det, vises, og en myk kant blandes med det bak. Kanten er altså maleriets eget omriss, flyttet
+    hel med laget, uansett vinkel; det finnes ikke noe nett av trekanter som må rives over
+    dybdehoppene. En kant blandes av de fire nærmeste pikslene, men bare dem laget har, så i ro
+    består den av maleriets egne piksler på begge sider. De få pikslene et nærmere lag tok over fra
+    bakgrunnen (dybdekartets myke kant) slipper det etter hvert som det beveger seg, så det ikke
+    drar en glorie med seg. Forfra og bakover kan stoppe ved første lag som dekker, og er raskere
+    enn bakfra (7 mot 10 ms per bilde på en RTX 4050 for Brudeferden).
+  - KI-generert innhold vises bare der maleriet ikke har noe å vise: det som var skjult bak noe
+    nærmere og kommer til syne når du beveger deg. Alle andre piksler er originalens, så står du
+    rett foran, er bildet identisk med originalen. «Marker KI-utfylling» (`K`) viser det som er
+    utfylt i rosa, og gult der ingen lag har noe (strukket som før).
 
-  Står du rett foran, vises bare originalpikslene: platen brukes kun i de smale stripene som
-  avdekkes når du beveger deg (rundt 0,1 % av bildet ved 3 % forskyvning). Det oppdiktede er
-  derfor lite synlig, men det er KI-generert innhold, og det dekkes av merket «Dybdeeffekt laget
-  med KI». LaMa-vektene (~200 MB, TorchScript fra IOPaint) lastes ned første gang og
-  kontrolleres mot sjekksum. Verk uten plate vises som før.
+  Det utfylte er likevel KI-generert innhold, og det dekkes av merket «Dybdeeffekt laget med
+  KI». LaMa-vektene (~200 MB, TorchScript fra IOPaint) lastes ned første gang og kontrolleres
+  mot sjekksum. Verk uten lag vises som før.
 - **Pust**: Når ingen rører musa, går kameraet i en langsom bane.
 - **Støv i lyset**: Partikler på ulike dybder følger samme parallakse, skjules bak nærmere
   flater og vises bare i lyse partier.
@@ -217,7 +237,7 @@ sertifikatadvarselen.
 | `/?kiosk` | Skjerm i museet: fyller skjermen uten grensesnitt, med pust, bytter verk hvert 25. sekund (piltastene virker også) |
 | `/?kiosk&head` | Som over, men perspektivet følger hodet til den som står foran (webkamera) |
 
-Hurtigtaster: `←` `→` bytt verk · `O` original · `M` teknikk · `D` dybdekart · `L` utfylt bakgrunn · `B` pust · `S` støv ·
+Hurtigtaster: `←` `→` bytt verk · `O` original · `M` teknikk · `D` dybdekart · `L` dybdelag · `K` marker KI-utfylling · `B` pust · `S` støv ·
 `Z` dolly zoom · `F` fyll skjermen (så stort som mulig uten beskjæring; grensesnittet skjules når musa er i ro) · `C` følg hodet · `R` lag klipp · `H` skjul grensesnitt.
 Dobbeltklikk på maleriet for å sette fokusplanet der.
 
@@ -227,8 +247,8 @@ Dobbeltklikk på maleriet for å sette fokusplanet der.
 tools/
   artworks.json        kuraterte verk med startverdier
   fetch_artworks.py    IIIF-nedlasting og metadata
-  make_depth.py        Depth Anything 3 → depth.png, og bakgrunnsplaten
-  layers.py            forgrunnsbånd ved dybdehopp + LaMa → background.jpg, layers.png
+  make_depth.py        Depth Anything 3 → depth.png, og dybdelagene
+  layers.py            dybdelag + LaMa → layer<k>.jpg, -alpha.png, -depth.png
   server.py            søk i samlingen + dybdekart på forespørsel (demosiden)
   setup.ps1            Python-miljø
 web/
@@ -243,7 +263,7 @@ web/
     headtrack.worker.js  kjører facetracker.js utenfor hovedtråden
     main.js            tilstand, grensesnitt, opptak
   art/works.json       generert manifest
-  art/<verk>/          image.jpg, depth.png, background.jpg, layers.png
+  art/<verk>/          image.jpg, depth.png, layer<k>.jpg/-alpha.png/-depth.png
 ```
 
 ## Design

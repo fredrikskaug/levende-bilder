@@ -41,6 +41,7 @@ void main() {
 }
 `;
 
+// One picture, one depth map: for works without depth layers, and to compare with them
 export const paintingFrag = /* glsl */ `#version 300 es
 precision highp float;
 
@@ -52,14 +53,9 @@ uniform float uShowDepth;   // 0..1 blend towards the depth visualisation
 uniform float uFocusFlash;  // 0..1 highlights the focus plane
 uniform float uFade;        // 0..1 used when switching paintings
 uniform vec3 uBackground;
-// What's behind the foreground near its edges (tools/layers.py): the picture with a band inside
-// every edge filled in by LaMa, and r: the depth there, g: 1 in that band
-uniform sampler2D uPlate;
-uniform sampler2D uLayers;
-uniform bool uLayered;
+uniform bool uDebug;        // mark edges that stretch
 
 ${COMMON}
-
 in vec2 vImg;
 out vec4 outColor;
 
@@ -96,88 +92,190 @@ vec2 parallaxOcclusion(vec2 q, out float hit) {
   return project(q, hit);
 }
 
-// Two layers: the band inside each foreground edge is a thin sheet with the plate behind it.
-// A ray that comes down from above hits the sheet as before. One that reaches the band from the
-// side, below its edge, has passed under it: it carries on to the plate, whose depth continues
-// from the foot of the edge, and shows what LaMa filled in instead of a smeared edge.
-vec2 parallaxLayered(vec2 q, out float hit, out bool onPlate) {
-  float stepSize = 1.0 / float(uSteps);
-  float sheet = 1.5 * stepSize;  // how far below the edge a ray still counts as hitting it
-  float z = 1.0;
-  float prevZ = z;
-  vec2 prevUv = project(q, z);
-  bool prevInBand = textureLod(uLayers, prevUv, 0.0).g > 0.5;
-  bool under = false;
-  for (int i = 0; i < 256; i++) {
-    vec2 uv = project(q, z);
-    vec2 layers = textureLod(uLayers, uv, 0.0).rg;  // r: depth of the plate, g: inside a band
-    float front = depthAt(uv);
-    bool inBand = layers.g > 0.5;
-    if (!inBand) under = false;
-    else if (!prevInBand && z < front - sheet) under = true;  // came in from the side, below the edge
-
-    bool hitFront = inBand && !under && z <= front;
-    bool hitPlate = z <= layers.r;  // outside the bands the plate is the picture itself
-    if (hitFront || hitPlate || i >= uSteps) {
-      // Outside the bands the plate is the picture: take the original, not the re-encoded plate
-      onPlate = !hitFront && inBand;
-      // Refine between the last step above the surface that was hit and this one
-      float hPrev = hitFront ? depthAt(prevUv) : textureLod(uLayers, prevUv, 0.0).r;
-      float hNow = hitFront ? front : layers.r;
-      float before = prevZ - hPrev;
-      float after = z - hNow;
-      float t = before > 0.0 ? clamp(before / max(before - after, 1e-5), 0.0, 1.0) : 1.0;
-      hit = mix(prevZ, z, t);
-      return project(q, hit);
-    }
-    prevZ = z;
-    prevUv = uv;
-    prevInBand = inBand;
-    z -= stepSize;
-  }
-  onPlate = false;
-  hit = z;
-  return project(q, z);
-}
-
-// Depth palette: far = deep blue, near = warm white
-vec3 depthPalette(float t) {
-  vec3 a = vec3(0.05, 0.06, 0.20);
-  vec3 b = vec3(0.32, 0.15, 0.52);
-  vec3 c = vec3(0.93, 0.42, 0.28);
-  vec3 d = vec3(1.00, 0.93, 0.70);
-  vec3 col = mix(a, b, smoothstep(0.0, 0.35, t));
-  col = mix(col, c, smoothstep(0.3, 0.7, t));
-  return mix(col, d, smoothstep(0.65, 1.0, t));
+// For the debug view: did the ray run into the side of something nearer (which stretches)?
+// Compares how steeply the surface rises along the ray's way with how fast the ray comes down.
+bool stretched(vec2 uv) {
+  vec2 size = vec2(textureSize(uDepth, 0));
+  vec2 along = -uShift * size;               // pixels the ray moves per unit of depth
+  float run = length(along);
+  if (run < 1e-3) return false;
+  vec2 e = normalize(along) * 2.0 / size;
+  float rise = (depthAt(uv + e) - depthAt(uv - e)) / 4.0;
+  return rise * run > 2.0;                   // stretched more than 3×
 }
 
 void main() {
   vec2 q = imgToQ(vImg);
   float hit;
-  bool onPlate = false;
-  vec2 uv = uMode == 0 ? parallaxNaive(q, hit)
-          : uLayered ? parallaxLayered(q, hit, onPlate)
-          : parallaxOcclusion(q, hit);
+  vec2 uv = uMode == 0 ? parallaxNaive(q, hit) : parallaxOcclusion(q, hit);
 
   // Use the undisplaced gradients for mip selection, otherwise depth edges pick blurry mips
-  vec3 col = onPlate ? textureGrad(uPlate, uv, dFdx(q), dFdy(q)).rgb
-                     : textureGrad(uImage, uv, dFdx(q), dFdy(q)).rgb;
+  vec3 col = textureGrad(uImage, uv, dFdx(q), dFdy(q)).rgb;
+  if (uDebug && uMode == 1 && stretched(uv)) col = mix(col, vec3(1.0, 0.9, 0.0), 0.6);
   // Content moved in from beyond the painting's edge (head tracking past the overscan) fades
   // to the background instead of smearing the edge pixels
   vec2 edge = min(uv, 1.0 - uv);
   float inside = smoothstep(-0.04, 0.0, min(edge.x, edge.y));
 
-  if (uShowDepth > 0.0) {
-    float lines = smoothstep(0.92, 1.0, fract(hit * 14.0)) * 0.25;
-    vec3 dcol = depthPalette(hit) + lines;
-    col = mix(col, dcol, uShowDepth);
-  }
+  // The depth map as the computer sees it: white near, black far
+  if (uShowDepth > 0.0) col = mix(col, vec3(hit), uShowDepth);
 
   if (uFocusFlash > 0.0) {
     float band = 1.0 - smoothstep(0.0, 0.035, abs(hit - uFocus));
     col = mix(col, vec3(0.45, 0.95, 1.0), band * 0.55 * uFocusFlash);
   }
 
+  outColor = vec4(mix(uBackground, col, uFade * inside), 1.0);
+}
+`;
+
+// Depth layers (tools/layers.py): each is one smooth surface with its own depth, its own pixels
+// (the painting's), what's hidden behind nearer layers (filled in by AI) and nothing elsewhere,
+// so its edge is its outline in the alpha map. For each pixel on screen, the view ray is followed
+// through the layers front to back: where it meets each layer's surface, and whether the layer has
+// anything there. The first that has is shown, and its soft edge is blended with what's behind.
+// So an edge is the painting's own outline, moved whole with the layer, at any angle.
+export const layersFrag = /* glsl */ `#version 300 es
+precision highp float;
+precision highp sampler2DArray;
+
+uniform sampler2D uImage;          // the painting itself, for the layers' own pixels
+uniform sampler2DArray uColors;    // per layer: what AI filled in behind the nearer layers
+uniform sampler2DArray uAlphas;    // per layer: 1 its own pixels, 0.86 its rim, 0.63 filled in, 0 nothing
+uniform sampler2DArray uDepths;    // per layer: its surface, smooth everywhere
+uniform int uCount;                // layers, back to front
+uniform vec2 uRange[8];            // each layer's lowest and highest depth
+uniform float uTravel;             // texels the view moves per unit of depth, at most
+uniform vec2 uRectPx;              // the painting's size on screen, in pixels
+uniform float uShowDepth;
+uniform float uFocusFlash;
+uniform float uFade;
+uniform vec3 uBackground;
+uniform bool uDebug;               // mark what was filled in by AI
+
+${COMMON}
+in vec2 vImg;
+out vec4 outColor;
+
+float depthOf(int k, vec2 uv) { return textureLod(uDepths, vec3(uv, float(k)), 0.0).r; }
+
+// Where the view ray through q meets layer k's surface: marched from the layer's nearest depth
+// back to its farthest, in steps of about a texel, with a linear refinement at the crossing.
+vec2 meet(vec2 q, int k, out float hit) {
+  vec2 range = uRange[k];
+  int steps = clamp(int(ceil((range.y - range.x) * uTravel)), 1, 48);
+  float stepSize = (range.y - range.x) / float(steps);
+  float z = range.y;
+  float h = depthOf(k, project(q, z));
+  float prevZ = z;
+  float prevH = h;
+  for (int i = 0; i < 48; i++) {
+    if (h >= z || i >= steps) break;
+    prevZ = z;
+    prevH = h;
+    z -= stepSize;
+    h = depthOf(k, project(q, z));
+  }
+  float before = prevZ - prevH;
+  float after = z - h;
+  float t = clamp(before / max(before - after, 1e-5), 0.0, 1.0);
+  hit = mix(prevZ, z, t);
+  return project(q, hit);
+}
+
+// Layer k at uv, from the four texels around it like a bilinear lookup, but counting only the
+// texels the layer has: how much of the pixel it covers, and its colour there, the painting's
+// where it has its own texels, else what was filled in. Filled-in texels (under a nearer layer)
+// count only towards what the nearer layers haven't covered yet (\`covered\`): so at rest a soft
+// edge is made of the painting's own pixels exactly as they are, never of what's hidden under the
+// nearer one. The layer's rim, taken over from what's behind, counts as much as \`keep\`.
+float sampleLayer(int k, vec2 uv, float keep, float covered, vec2 gx, vec2 gy, out vec3 colour, out bool filledIn) {
+  ivec2 size = textureSize(uAlphas, 0).xy;
+  vec2 st = uv * vec2(size) - 0.5;
+  ivec2 i0 = ivec2(floor(st));
+  vec2 f = st - floor(st);
+  float ownW = 0.0;
+  float fillW = 0.0;   // filled in, under a nearer layer
+  vec3 ownC = vec3(0.0);
+  vec3 fillC = vec3(0.0);
+  bool inside = true;  // all four its own, nothing else involved
+  for (int j = 0; j < 4; j++) {
+    ivec2 o = ivec2(j & 1, j >> 1);
+    ivec2 t = clamp(i0 + o, ivec2(0), size - 1);
+    float w = (o.x == 1 ? f.x : 1.0 - f.x) * (o.y == 1 ? f.y : 1.0 - f.y);
+    float a = texelFetch(uAlphas, ivec3(t, k), 0).r;
+    inside = inside && a > 0.97;
+    if (a < 0.3) continue;
+    if (a < 0.8) {
+      fillW += w;
+      fillC += w * texelFetch(uColors, ivec3(t, k), 0).rgb;
+    } else {
+      if (a < 0.97) w *= keep;
+      ownW += w;
+      ownC += w * texelFetch(uImage, t, 0).rgb;
+    }
+  }
+  float s = fillW > 0.0 ? clamp((fillW - covered) / fillW, 0.0, 1.0) : 1.0;
+  fillW *= s;
+  fillC *= s;
+  filledIn = ownW <= 0.0;
+  // Inside, filtered as usual (with mipmaps when the painting is shown smaller than it is)
+  colour = inside ? textureGrad(uImage, uv, gx, gy).rgb : ownW > 0.0 ? ownC / ownW : fillC / max(fillW, 1e-6);
+  return ownW + fillW;
+}
+
+void main() {
+  vec2 q = imgToQ(vImg);
+  vec2 gx = dFdx(q);
+  vec2 gy = dFdy(q);
+  float moved = length(uShift * uRectPx);  // screen pixels per unit of depth difference
+  vec3 col = vec3(0.0);
+  float covered = 0.0;
+  float shownDepth = 0.0;
+  vec2 shownUv = q;
+  vec2 lastUv = q;
+  float lastHit = 0.0;
+  for (int k = 7; k >= 0; k--) {
+    if (k >= uCount) continue;
+    float hit;
+    vec2 uv = meet(q, k, hit);
+    lastUv = uv;
+    lastHit = hit;
+    // The rim a nearer layer took over from what's behind (the depth map's soft edge, in the
+    // background's colours): let it go as the layer moves away from what's behind, so it doesn't
+    // drag a halo along. At rest it stays, and the picture is the painting.
+    float keep = k > 0 ? 1.0 - smoothstep(0.5, 2.0, moved * max(hit - depthOf(k - 1, uv), 0.0)) : 1.0;
+    vec3 c;
+    bool filledIn;
+    float coverage = sampleLayer(k, uv, keep, covered, gx, gy, c, filledIn);
+    if (coverage <= 0.0) continue;
+    if (uDebug && filledIn) c = mix(c, vec3(1.0, 0.0, 0.8), 0.55);
+    // It fills what the nearer layers left uncovered, as far as it covers: at a soft edge the
+    // layers' texels are side by side, not on top of each other
+    float w = min(coverage, 1.0 - covered);
+    if (covered == 0.0) { shownDepth = hit; shownUv = uv; }
+    col += w * c;
+    covered += w;
+    if (covered > 0.996) break;
+  }
+  // Where no layer has anything (beyond what was filled in), the farthest layer's surface,
+  // stretched as before, instead of a hole
+  if (covered < 0.996) {
+    vec3 c = textureGrad(uImage, lastUv, gx, gy).rgb;
+    if (uDebug) c = mix(c, vec3(1.0, 0.9, 0.0), 0.6);
+    if (covered == 0.0) { shownDepth = lastHit; shownUv = lastUv; }
+    col += (1.0 - covered) * c;
+  }
+
+  // Content moved in from beyond the painting's edge fades to the background
+  vec2 edge = min(shownUv, 1.0 - shownUv);
+  float inside = smoothstep(-0.04, 0.0, min(edge.x, edge.y));
+  // The depth as the computer sees it: white near, black far
+  if (uShowDepth > 0.0) col = mix(col, vec3(shownDepth), uShowDepth);
+  if (uFocusFlash > 0.0) {
+    float band = 1.0 - smoothstep(0.0, 0.035, abs(shownDepth - uFocus));
+    col = mix(col, vec3(0.45, 0.95, 1.0), band * 0.55 * uFocusFlash);
+  }
   outColor = vec4(mix(uBackground, col, uFade * inside), 1.0);
 }
 `;
